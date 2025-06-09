@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Terminais</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            animation: slideDown 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: fadeIn 0.7s ease-out;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: #1a252f;
+        }
+        
+        .btn-start {
+            background-color: var(--success);
+        }
+        
+        .btn-start:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-end {
+            background-color: var(--accent);
+        }
+        
+        .btn-end:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .timer-display {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .status.active {
+            opacity: 1;
+        }
+        
+        .status-success {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+        
+        .status-error {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--accent);
+        }
+        
+        .acionamento-pendente {
+            background-color: #fff0f0;
+            border-left: 5px solid var(--accent);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .acionamento-pendente:hover {
+            background-color: #ffe0e0;
+            transform: translateY(-2px);
+        }
+        
+        .acionamento-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .acionamento-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .acionamento-setor {
+            background-color: var(--accent);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .acionamento-details {
+            margin-bottom: 10px;
+        }
+        
+        .acionamento-time {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .atendimento-card {
+            background-color: #fffae6;
+            border-left: 5px solid var(--warning);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .atendimento-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .atendimento-title {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .atendimento-tempo {
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+        
+        .atendimento-details {
+            margin-bottom: 10px;
+        }
+        
+        .atendimento-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="Logo HCI" class="logo">
+        <h1>Registro de Terminais</h1>
+        <p>Registre as terminais do seu setor</p>
+    </header>
+    
+    <div class="container">
+        <div class="card">
+            <div class="form-group">
+                <label for="nome">Nome do Profissional:</label>
+                <input type="text" id="nome" placeholder="Digite seu nome completo">
+            </div>
+            
+            <div class="form-group">
+                <label for="setor">Setor:</label>
+                <select id="setor">
+                    <option value="">Selecione o setor</option>
+                    <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+                    <option value="Maternidade">Maternidade</option>
+                    <option value="Pediatria">Pediatria</option>
+                    <option value="Pronto Socorro">Pronto Socorro</option>
+                    <option value="UTI 1">UTI 1</option>
+                    <option value="UTI 2">UTI 2</option>
+                    <option value="UTI 3">UTI 3</option>
+                    <option value="UTI NEO">UTI NEO</option>
+                    <option value="Unidade de Internação 2º Andar">Unidade de Internação 2º Andar</option>
+                    <option value="Unidade de Internação 4º Andar">Unidade de Internação 4º Andar</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="motivo">Motivo:</label>
+                <select id="motivo">
+                    <option value="">Selecione o motivo</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Obito">Obito</option>
+                    <option value="Transferência de leito">Transferência de leito</option>
+                    <option value="Transferência por setor">Transferência por setor</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="leito">Leito:</label>
+                <input type="text" id="leito" placeholder="Número do leito">
+            </div>
+            
+            <div class="form-group">
+                <label for="observacao">Observações:</label>
+                <textarea id="observacao" placeholder="Adicione observações relevantes"></textarea>
+            </div>
+            
+            <div id="status" class="status"></div>
+            
+            <div id="timer" class="timer-display" style="display: none;">
+                Tempo decorrido: <span id="time-display">00:00:00</span>
+            </div>
+            
+            <div class="btn-group">
+                <button id="start-btn" class="btn btn-start">Iniciar Terminal</button>
+                <button id="end-btn" class="btn btn-end" disabled>Finalizar Terminal</button>
+            </div>
+        </div>
+        
+        <div class="card" id="acionamentos-pendentes">
+            <h3>Acionamentos Pendentes</h3>
+            <div id="pendentes-list">
+                <!-- Acionamentos pendentes serão exibidos aqui -->
+            </div>
+        </div>
+        
+        <div id="atendimentos-ativos">
+            <h3>Atendimentos em Andamento</h3>
+            <div id="atendimentos-list">
+                <!-- Atendimentos ativos serão exibidos aqui -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Mapeamento de setores para leitos
+        const setorLeitos = {
+            "UTI 1": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10"],
+            "UTI 2": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10"],
+            "UTI 3": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10"],
+            "UTI NEO": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10","LEITO 11", "LEITO 12"],
+            "Centro Cirúrgico": ["Sala 1", "Sala 2", "Sala 3", "Sala 4", "Sala 5", "Sala 6", "Sala 7", "Sala 8"],
+            "Unidade de Internação 4º Andar": ["412", "414", "415", "416", "416 A", "416 B", "417", "417 A","417 B","418","419","420","421","422","423","424","424 A","424 B","425","425 A","425 B","426","426 A","426 B","427","427 A","427 B","428","428 A","428 B","429","429 A","429 B"],
+            "Unidade de Internação 2º Andar": ["201", "202", "202 A", "202 B", "202 C", "202 E", "203", "203 A","203 C","203 D","203 E","204","204 A","204 C","205","205 A","205 C","206","206 A","206 C","207","207 A","207 C","208","208 A","208 C","209","209 A","209 C","210","210 A","210 C","211 A","211 C","212","212 A","212 B","213","213 A","213 C","213 D","213 E"],
+            "Pediatria": ["312", "312 A", "312 B", "312 B", "312 C", "313", "314", "314 A","314 B","315","315 A","315 B","316","316 A","316 B","316 C","316 D","317","317 A","317 B","317 C",],
+            "Maternidade": ["301", "301 A", "301 B", "301 C", "302", "302 A", "302 B", "303","303 A","303 B","304","304 A","304 B","305","305 A","305 B","306","307","308","308 A","308 B","309","309 A","309 B","310","310 A","310 B","PPP 1","PPP 2","PPP 3","SALA OBSTÉTRICA 1","SALA OBSTÉTRICA 2"],
+            "Pronto Socorro": ["OBS 1", "OBS 2", "OBS 3", "OBS 4", "OBS 5", "OBS 6", "OBS 7", "OBS 8","OBS 9","OBS 10","OBS 11","OBS 12"]
+        };
+
+        // Atualizar opções de leito quando o setor muda
+        document.getElementById('setor').addEventListener('change', function() {
+            const setor = this.value;
+            const leitoInput = document.getElementById('leito');
+            
+            // Limpar input de leito
+            leitoInput.value = '';
+            
+            // Se um setor válido foi selecionado, transformar em select
+            if (setor && setorLeitos[setor]) {
+                // Criar select se não existir
+                if (leitoInput.tagName === 'INPUT') {
+                    const select = document.createElement('select');
+                    select.id = 'leito';
+                    select.innerHTML = '<option value="">Selecione o leito</option>';
+                    
+                    // Adicionar opções de leito
+                    setorLeitos[setor].forEach(leito => {
+                        select.innerHTML += `<option value="${leito}">${leito}</option>`;
+                    });
+                    
+                    // Substituir input por select
+                    leitoInput.parentNode.replaceChild(select, leitoInput);
+                } else {
+                    // Atualizar opções do select existente
+                    const select = document.getElementById('leito');
+                    select.innerHTML = '<option value="">Selecione o leito</option>';
+                    setorLeitos[setor].forEach(leito => {
+                        select.innerHTML += `<option value="${leito}">${leito}</option>`;
+                    });
+                }
+            } else {
+                // Se não houver setor selecionado ou não for um setor com leitos definidos, manter como input
+                if (leitoInput.tagName === 'SELECT') {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = 'leito';
+                    input.placeholder = 'Número do leito';
+                    leitoInput.parentNode.replaceChild(input, leitoInput);
+                }
+            }
+        });
+
+        // Variáveis globais
+        let currentRecord = {};
+        let activeRecords = {};
+        let timers = {};
+        let pendingActivations = [];
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar atendimentos ativos do localStorage
+            loadActiveRecordsFromStorage();
+            
+            // Carregar acionamentos pendentes
+            loadPendingActivations();
+            
+            // Configurar eventos
+            document.getElementById('start-btn').addEventListener('click', startRecording);
+            document.getElementById('end-btn').addEventListener('click', finishRecording);
+            
+            // Atualizar a cada 5 segundos
+            setInterval(updateActiveRecordsDisplay, 5000);
+            
+            // Salvar estado ao sair da página
+            window.addEventListener('beforeunload', saveCurrentState);
+        });
+        
+        function loadActiveRecordsFromStorage() {
+            // Carrega atendimentos ativos do localStorage
+            const records = JSON.parse(localStorage.getItem('activityRecords')) || [];
+            activeRecords = {};
+            
+            records.forEach(record => {
+                if (record.status === 'active') {
+                    activeRecords[record.id] = record;
+                    
+                    // Se não tiver um timer para este registro, inicia um
+                    if (!timers[record.id]) {
+                        startTimer(record.id);
+                    }
+                }
+            });
+            
+            updateActiveRecordsDisplay();
+        }
+        
+        function loadPendingActivations() {
+            pendingActivations = JSON.parse(localStorage.getItem('acionamentos')) || [];
+            pendingActivations = pendingActivations.filter(a => a.status === 'pendente');
+            updatePendingActivationsDisplay();
+        }
+        
+        function updatePendingActivationsDisplay() {
+            const container = document.getElementById('pendentes-list');
+            container.innerHTML = '';
+            
+            if (pendingActivations.length === 0) {
+                container.innerHTML = '<p>Nenhum acionamento pendente</p>';
+                return;
+            }
+            
+            pendingActivations.forEach(acionamento => {
+                const dataHora = new Date(acionamento.dataHora);
+                
+                const item = document.createElement('div');
+                item.className = 'acionamento-pendente';
+                item.innerHTML = `
+                    <div class="acionamento-header">
+                        <div class="acionamento-title">Leito ${acionamento.leito}</div>
+                        <div class="acionamento-setor">${acionamento.setor}</div>
+                    </div>
+                    <div class="acionamento-details">
+                        <div><strong>Solicitante:</strong> ${acionamento.responsavel}</div>
+                    </div>
+                    <div class="acionamento-time">
+                        ${formatDateTime(dataHora)}
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => selectActivation(acionamento));
+                container.appendChild(item);
+            });
+        }
+        
+        function selectActivation(acionamento) {
+            // Preencher campos automaticamente
+            document.getElementById('setor').value = acionamento.setor;
+            
+            // Disparar evento change para atualizar os leitos
+            const event = new Event('change');
+            document.getElementById('setor').dispatchEvent(event);
+            
+            // Esperar um pouco para garantir que o select foi criado
+            setTimeout(() => {
+                const leitoSelect = document.getElementById('leito');
+                if (leitoSelect && leitoSelect.tagName === 'SELECT') {
+                    leitoSelect.value = acionamento.leito;
+                } else {
+                    document.getElementById('leito').value = acionamento.leito;
+                }
+            }, 100);
+            
+            // Mostrar mensagem
+            showStatus(`Acionamento do leito ${acionamento.leito} selecionado`, 'success');
+            
+            // Focar no campo de nome
+            document.getElementById('nome').focus();
+            
+            // Atualizar status do acionamento para "em atendimento"
+            updateActivationStatus(acionamento.id, 'em_atendimento');
+        }
+        
+        function updateActivationStatus(id, newStatus) {
+            let acionamentos = JSON.parse(localStorage.getItem('acionamentos')) || [];
+            acionamentos = acionamentos.map(a => {
+                if (a.id === id) {
+                    return {...a, status: newStatus};
+                }
+                return a;
+            });
+            localStorage.setItem('acionamentos', JSON.stringify(acionamentos));
+            
+            // Recarregar a lista de pendentes
+            loadPendingActivations();
+        }
+        
+        function startRecording() {
+            const nome = document.getElementById('nome').value;
+            const setor = document.getElementById('setor').value;
+            const motivo = document.getElementById('motivo').value;
+            const leitoElement = document.getElementById('leito');
+            const leito = leitoElement.value;
+            const observacao = document.getElementById('observacao').value;
+            
+            if (!nome || !setor || !motivo || !leito) {
+                showStatus('Por favor, preencha todos os campos obrigatórios!', 'error');
+                return;
+            }
+            
+            const recordId = Date.now();
+            
+            currentRecord = {
+                id: recordId,
+                nome,
+                setor,
+                motivo,
+                leito,
+                observacao,
+                startTime: new Date(),
+                status: 'active'
+            };
+            
+            // Iniciar temporizador
+            startTimer(recordId);
+            
+            // Mostrar temporizador
+            document.getElementById('timer').style.display = 'block';
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('end-btn').disabled = false;
+            document.getElementById('end-btn').classList.add('pulse');
+            
+            showStatus('Atendimento iniciado com sucesso!', 'success');
+            
+            // Adicionar aos registros ativos
+            activeRecords[recordId] = currentRecord;
+            updateActiveRecordsDisplay();
+            
+            // Salvar no localStorage
+            saveCurrentRecord();
+            
+            // Limpar formulário para novo registro
+            document.getElementById('motivo').value = '';
+            document.getElementById('observacao').value = '';
+            
+            // Resetar campo de leito para input padrão
+            if (leitoElement.tagName === 'SELECT') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'leito';
+                input.placeholder = 'Número do leito';
+                leitoElement.parentNode.replaceChild(input, leitoElement);
+            } else {
+                leitoElement.value = '';
+            }
+        }
+        
+        function startTimer(recordId) {
+            // Se já existir um timer para este registro, não criar outro
+            if (timers[recordId]) return;
+            
+            timers[recordId] = {
+                startTime: new Date().getTime(),
+                interval: setInterval(() => updateTimer(recordId), 1000)
+            };
+        }
+        
+        function updateTimer(recordId) {
+            if (!timers[recordId]) return;
+            
+            const now = new Date().getTime();
+            const elapsed = now - timers[recordId].startTime;
+            
+            const hours = Math.floor(elapsed / (1000 * 60 * 60));
+            const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+            
+            // Atualizar display do temporizador principal se for o registro atual
+            if (currentRecord.id === recordId) {
+                document.getElementById('time-display').textContent = 
+                    `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            }
+            
+            // Atualizar display na lista de atendimentos ativos
+            const timerElement = document.getElementById(`timer-${recordId}`);
+            if (timerElement) {
+                timerElement.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            }
+        }
+        
+        function finishRecording() {
+            if (!currentRecord.id) return;
+            
+            const endTime = new Date();
+            const elapsed = endTime.getTime() - timers[currentRecord.id].startTime;
+            
+            // Parar temporizador
+            clearInterval(timers[currentRecord.id].interval);
+            delete timers[currentRecord.id];
+            
+            // Completar registro
+            currentRecord.endTime = endTime;
+            currentRecord.duration = elapsed;
+            currentRecord.status = 'completed';
+            
+            // Salvar no histórico
+            saveRecord(currentRecord);
+            
+            // Atualizar status do acionamento para "concluido" se existir
+            const relatedActivation = pendingActivations.find(a => 
+                a.setor === currentRecord.setor && 
+                a.leito === currentRecord.leito &&
+                a.status === 'em_atendimento'
+            );
+            
+            if (relatedActivation) {
+                updateActivationStatus(relatedActivation.id, 'concluido');
+            }
+            
+            // Remover dos registros ativos
+            delete activeRecords[currentRecord.id];
+            updateActiveRecordsDisplay();
+            
+            // Resetar interface
+            document.getElementById('timer').style.display = 'none';
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('end-btn').disabled = true;
+            document.getElementById('end-btn').classList.remove('pulse');
+            
+            showStatus(`Atendimento finalizado! Tempo total: ${formatDuration(elapsed)}`, 'success');
+            
+            // Resetar registro atual
+            currentRecord = {};
+            
+            // Limpar formulário
+            document.getElementById('nome').value = '';
+            document.getElementById('setor').value = '';
+            document.getElementById('motivo').value = '';
+            document.getElementById('observacao').value = '';
+            
+            // Resetar campo de leito para input padrão
+            const leitoElement = document.getElementById('leito');
+            if (leitoElement.tagName === 'SELECT') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = 'leito';
+                input.placeholder = 'Número do leito';
+                leitoElement.parentNode.replaceChild(input, leitoElement);
+            } else {
+                leitoElement.value = '';
+            }
+        }
+        
+        function saveCurrentRecord() {
+            let records = JSON.parse(localStorage.getItem('activityRecords')) || [];
+            
+            // Remove o registro antigo se existir
+            records = records.filter(r => r.id !== currentRecord.id);
+            
+            // Adiciona o registro atualizado
+            records.push(currentRecord);
+            
+            localStorage.setItem('activityRecords', JSON.stringify(records));
+        }
+        
+        function saveRecord(record) {
+            let records = JSON.parse(localStorage.getItem('activityRecords')) || [];
+            
+            // Remove o registro antigo se existir
+            records = records.filter(r => r.id !== record.id);
+            
+            // Adiciona o registro atualizado
+            records.push(record);
+            
+            localStorage.setItem('activityRecords', JSON.stringify(records));
+        }
+        
+        function saveCurrentState() {
+            if (currentRecord.id) {
+                saveCurrentRecord();
+            }
+        }
+        
+        function updateActiveRecordsDisplay() {
+            const container = document.getElementById('atendimentos-list');
+            container.innerHTML = '';
+            
+            if (Object.keys(activeRecords).length === 0) {
+                container.innerHTML = '<p>Nenhum atendimento em andamento</p>';
+                return;
+            }
+            
+            Object.values(activeRecords).forEach(record => {
+                const card = document.createElement('div');
+                card.className = 'atendimento-card';
+                card.innerHTML = `
+                    <div class="atendimento-header">
+                        <div class="atendimento-title">${record.leito} - ${record.setor}</div>
+                        <div class="atendimento-tempo" id="timer-${record.id}">00:00:00</div>
+                    </div>
+                    <div class="atendimento-details">
+                        <div><strong>Profissional:</strong> ${record.nome}</div>
+                        <div><strong>Motivo:</strong> ${record.motivo}</div>
+                        ${record.observacao ? `<div><strong>Observações:</strong> ${record.observacao}</div>` : ''}
+                    </div>
+                    <div class="atendimento-actions">
+                        <button class="btn btn-warning" onclick="focusRecord(${record.id})">Focar</button>
+                        <button class="btn btn-end" onclick="finishActiveRecord(${record.id})">Finalizar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+                
+                // Atualizar o timer imediatamente
+                if (timers[record.id]) {
+                    const elapsed = new Date().getTime() - timers[record.id].startTime;
+                    const hours = Math.floor(elapsed / (1000 * 60 * 60));
+                    const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((elapsed % (1000 * 60)) / 1000)
+                    
+                    const timerElement = document.getElementById(`timer-${record.id}`);
+                    if (timerElement) {
+                        timerElement.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+                    }
+                }
+            });
+        }
+        
+        function focusRecord(recordId) {
+            if (activeRecords[recordId]) {
+                // Parar temporizador atual se houver
+                if (currentRecord.id && timers[currentRecord.id]) {
+                    clearInterval(timers[currentRecord.id].interval);
+                }
+                
+                // Definir novo registro atual
+                currentRecord = {...activeRecords[recordId]};
+                
+                // Preencher formulário
+                document.getElementById('nome').value = currentRecord.nome;
+                document.getElementById('setor').value = currentRecord.setor;
+                document.getElementById('motivo').value = currentRecord.motivo;
+                document.getElementById('leito').value = currentRecord.leito;
+                document.getElementById('observacao').value = currentRecord.observacao || '';
+                
+                // Mostrar temporizador
+                document.getElementById('timer').style.display = 'block';
+                document.getElementById('start-btn').disabled = true;
+                document.getElementById('end-btn').disabled = false;
+                document.getElementById('end-btn').classList.add('pulse');
+                
+                // Reiniciar temporizador visual
+                const elapsed = new Date().getTime() - new Date(currentRecord.startTime).getTime();
+                const hours = Math.floor(elapsed / (1000 * 60 * 60));
+                const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+                document.getElementById('time-display').textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+                
+                // Reiniciar intervalo de atualização
+                timers[currentRecord.id] = {
+                    startTime: new Date().getTime() - elapsed,
+                    interval: setInterval(() => updateTimer(currentRecord.id), 1000)
+                };
+                
+                showStatus(`Atendimento ${currentRecord.leito} em foco`, 'success');
+            }
+        }
+        
+        function finishActiveRecord(recordId) {
+            if (activeRecords[recordId]) {
+                const record = activeRecords[recordId];
+                const endTime = new Date();
+                const startTime = new Date(record.startTime);
+                const elapsed = endTime.getTime() - startTime.getTime();
+                
+                // Parar temporizador
+                if (timers[recordId]) {
+                    clearInterval(timers[recordId].interval);
+                    delete timers[recordId];
+                }
+                
+                // Completar registro
+                const completedRecord = {
+                    ...record,
+                    endTime: endTime,
+                    duration: elapsed,
+                    status: 'completed'
+                };
+                
+                // Salvar no histórico
+                saveRecord(completedRecord);
+                
+                // Atualizar status do acionamento para "concluido" se existir
+                const relatedActivation = pendingActivations.find(a => 
+                    a.setor === record.setor && 
+                    a.leito === record.leito &&
+                    a.status === 'em_atendimento'
+                );
+                
+                if (relatedActivation) {
+                    updateActivationStatus(relatedActivation.id, 'concluido');
+                }
+                
+                // Remover dos ativos
+                delete activeRecords[recordId];
+                updateActiveRecordsDisplay();
+                
+                // Se for o registro atual, resetar interface
+                if (currentRecord.id === recordId) {
+                    document.getElementById('timer').style.display = 'none';
+                    document.getElementById('start-btn').disabled = false;
+                    document.getElementById('end-btn').disabled = true;
+                    document.getElementById('end-btn').classList.remove('pulse');
+                    currentRecord = {};
+                }
+                
+                showStatus(`Atendimento ${record.leito} finalizado!`, 'success');
+            }
+        }
+        
+        function pad(num) {
+            return num.toString().padStart(2, '0');
+        }
+        
+        function formatDateTime(date) {
+            const options = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return date.toLocaleString('pt-BR', options);
+        }
+        
+        function formatDuration(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${'status-' + type} active`;
+            
+            setTimeout(() => {
+                statusEl.classList.remove('active');
+            }, 5000);
+        }
+        
+        // Funções globais para os botões
+        window.focusRecord = focusRecord;
+        window.finishActiveRecord = finishActiveRecord;
+    </script>
+</body>
+</html>

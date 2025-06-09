@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualização de Registros</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #ec2610;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #ff9d00;
+            --info: #3498db;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            animation: slideDown 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            margin: 20px 0;
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 5px;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .stat-total {
+            color: var(--primary);
+        }
+        
+        .stat-pendente {
+            color: var(--accent);
+        }
+        
+        .stat-andamento {
+            color: var(--warning);
+        }
+        
+        .stat-hoje {
+            color: var(--info);
+        }
+        
+        .stat-media {
+            color: #9b59b6;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        /* Novo estilo para o menu de filtros */
+        .filters-menu {
+            margin-bottom: 20px;
+        }
+        
+        .filters-toggle {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 200px;
+            font-weight: 600;
+        }
+        
+        .filters-toggle:hover {
+            background-color: #1a252f;
+        }
+        
+        .filters-toggle i {
+            transition: transform 0.3s;
+        }
+        
+        .filters-toggle.active i {
+            transform: rotate(180deg);
+        }
+        
+        .filters-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .filters-container.active {
+            display: block;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .filter-group input, .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .btn-filter {
+            padding: 10px 20px;
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .btn-clear {
+            background-color: #95a5a6;
+        }
+        
+        /* Restante dos estilos permanece igual */
+        .ativos-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .ativo-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            border-left: 5px solid var(--warning);
+        }
+        
+        .ativo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .ativo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .ativo-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .ativo-setor {
+            background-color: var(--warning);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .ativo-tempo {
+            font-family: monospace;
+            font-size: 1.3rem;
+            text-align: center;
+            margin: 10px 0;
+            color: var(--dark);
+        }
+        
+        .ativo-detail {
+            margin-bottom: 8px;
+            display: flex;
+        }
+        
+        .ativo-label {
+            font-weight: 600;
+            margin-right: 5px;
+            min-width: 100px;
+        }
+        
+        .records-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .record-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            position: relative;
+        }
+        
+        .record-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .record-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .record-setor {
+            background-color: var(--secondary);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .record-detail {
+            margin-bottom: 8px;
+            display: flex;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            margin-right: 5px;
+            min-width: 100px;
+        }
+        
+        .record-time {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .record-duration {
+            font-weight: 600;
+            color: var(--success);
+        }
+        
+        .no-records {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        
+        .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        .status-pendente {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--accent);
+        }
+        
+        .status-andamento {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+        }
+        
+        .status-concluido {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <!-- Adicionando ícone para o botão de filtro -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="Logo HCI" class="logo">
+        <h1>Visualização de Terminais</h1>
+        <p>Painel completo de acompanhamento de Terminais do HCI</p>
+    </header>
+    
+    <div class="container">
+        <!-- Novo menu de filtros -->
+        <div class="filters-menu">
+            <button class="filters-toggle" id="filters-toggle">
+                <span>Filtros</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="filters-container" id="filters-container">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="filter-profissional">Profissional</label>
+                        <input type="text" id="filter-profissional" placeholder="Nome do profissional">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-setor">Setor</label>
+                        <select id="filter-setor">
+                            <option value="">Selecione o setor</option>
+                    <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+                    <option value="Maternidade">Maternidade</option>
+                    <option value="Pediatria">Pediatria</option>
+                    <option value="Pronto Socorro">Pronto Socorro</option>
+                    <option value="UTI 1">UTI 1</option>
+                    <option value="UTI 2">UTI 2</option>
+                    <option value="UTI 3">UTI 3</option>
+                    <option value="UTI NEO">UTI NEO</option>
+                    <option value="Unidade de Internação 2º Andar">Unidade de Internação 2º Andar</option>
+                    <option value="Unidade de Internação 4º Andar">Unidade de Internação 4º Andar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="filter-data-inicio">Data de início</label>
+                        <input type="date" id="filter-data-inicio">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-data-fim">Data de fim</label>
+                        <input type="date" id="filter-data-fim">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn-filter btn-clear" id="clear-filters">Limpar</button>
+                    <button class="btn-filter" id="apply-filters">Aplicar Filtros</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Seção de Estatísticas -->
+        <div>
+            <h2>Estatísticas em Tempo Real</h2>
+            <div class="stats-container" id="stats-container">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Seção de Atendimentos em Andamento -->
+        <div>
+            <h2>Terminais em Andamento</h2>
+            <div class="ativos-container" id="ativos-container">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Seção de Histórico de Atendimentos -->
+        <div>
+            <h2>Terminais finalizadas</h2>
+            <div class="records-container" id="atendimentos-list">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Seção de Histórico de Acionamentos -->
+        <div>
+            <h2>Histórico de Acionamentos</h2>
+            <div class="records-container" id="acionamentos-list">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Variáveis globais
+        let activeTimers = {};
+        let currentFilters = {
+            profissional: '',
+            setor: '',
+            dataInicio: '',
+            dataFim: ''
+        };
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllData();
+            
+            // Configurar eventos dos filtros
+            document.getElementById('apply-filters').addEventListener('click', applyFilters);
+            document.getElementById('clear-filters').addEventListener('click', clearFilters);
+            
+            // Configurar toggle do menu de filtros
+            document.getElementById('filters-toggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                document.getElementById('filters-container').classList.toggle('active');
+            });
+            
+            // Atualizar dados a cada 5 segundos
+            setInterval(loadAllData, 5000);
+        });
+        
+        function applyFilters() {
+            currentFilters = {
+                profissional: document.getElementById('filter-profissional').value.trim().toLowerCase(),
+                setor: document.getElementById('filter-setor').value,
+                dataInicio: document.getElementById('filter-data-inicio').value,
+                dataFim: document.getElementById('filter-data-fim').value
+            };
+            
+            loadAllData();
+        }
+        
+        function clearFilters() {
+            document.getElementById('filter-profissional').value = '';
+            document.getElementById('filter-setor').value = '';
+            document.getElementById('filter-data-inicio').value = '';
+            document.getElementById('filter-data-fim').value = '';
+            
+            currentFilters = {
+                profissional: '',
+                setor: '',
+                dataInicio: '',
+                dataFim: ''
+            };
+            
+            loadAllData();
+        }
+        
+        function loadAllData() {
+            loadStats();
+            loadAtivos();
+            loadAtendimentos();
+            loadAcionamentos();
+        }
+        
+        function loadStats() {
+            const atendimentos = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
+            const acionamentos = filterRecords(JSON.parse(localStorage.getItem('acionamentos')) || [], true);
+            
+            // Calcular estatísticas
+            const totalAtendimentos = atendimentos.length;
+            const totalAcionamentos = acionamentos.length;
+            
+            const atendimentosHoje = atendimentos.filter(a => {
+                const data = new Date(a.startTime);
+                return isToday(data);
+            }).length;
+            
+            const acionamentosHoje = acionamentos.filter(a => {
+                const data = new Date(a.dataHora);
+                return isToday(data);
+            }).length;
+            
+            const acionamentosPendentes = acionamentos.filter(a => a.status === 'pendente').length;
+            const acionamentosEmAtendimento = acionamentos.filter(a => a.status === 'em_atendimento').length;
+            const acionamentosConcluidos = acionamentos.filter(a => a.status === 'concluido').length;
+            
+            // Calcular tempo médio de atendimento (em milissegundos)
+            const atendimentosConcluidos = atendimentos.filter(a => a.status === 'completed' && a.duration);
+            let tempoMedio = 0;
+            
+            if (atendimentosConcluidos.length > 0) {
+                const totalTempo = atendimentosConcluidos.reduce((sum, a) => sum + a.duration, 0);
+                tempoMedio = totalTempo / atendimentosConcluidos.length;
+            }
+            
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value stat-total">${totalAtendimentos}</div>
+                    <div class="stat-label">Total de Terminais</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-total">${totalAcionamentos}</div>
+                    <div class="stat-label">Total de Acionamentos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-hoje">${atendimentosHoje}</div>
+                    <div class="stat-label">Terminais Hoje</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-hoje">${acionamentosHoje}</div>
+                    <div class="stat-label">Acionamentos Hoje</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-pendente">${acionamentosPendentes}</div>
+                    <div class="stat-label">Terminais Pendentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-andamento">${acionamentosEmAtendimento}</div>
+                    <div class="stat-label">Em Atendimento</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-success">${acionamentosConcluidos}</div>
+                    <div class="stat-label">Concluídos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value stat-media">${formatDurationShort(tempoMedio)}</div>
+                    <div class="stat-label">Tempo Médio</div>
+                </div>
+            `;
+        }
+        
+        function filterRecords(records, isAcionamento = false) {
+            return records.filter(record => {
+                // Filtro por profissional
+                if (currentFilters.profissional && 
+                    (!isAcionamento && !record.nome.toLowerCase().includes(currentFilters.profissional))) {
+                    return false;
+                }
+                
+                // Filtro por setor
+                if (currentFilters.setor && record.setor !== currentFilters.setor) {
+                    return false;
+                }
+                
+                // Filtro por data
+                const recordDate = isAcionamento ? 
+                    new Date(record.dataHora) : 
+                    new Date(record.startTime);
+                
+                if (currentFilters.dataInicio) {
+                    const filterDate = new Date(currentFilters.dataInicio);
+                    if (recordDate < filterDate) return false;
+                }
+                
+                if (currentFilters.dataFim) {
+                    const filterDate = new Date(currentFilters.dataFim);
+                    filterDate.setDate(filterDate.getDate() + 1); // Inclui o dia inteiro
+                    if (recordDate >= filterDate) return false;
+                }
+                
+                return true;
+            });
+        }
+        
+        function loadAtivos() {
+            const records = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
+            const ativos = records.filter(record => record.status === 'active');
+            
+            const container = document.getElementById('ativos-container');
+            container.innerHTML = '';
+            
+            if (ativos.length === 0) {
+                container.innerHTML = '<div class="no-records">Nenhum atendimento em andamento no momento</div>';
+                return;
+            }
+            
+            // Parar todos os temporizadores antigos
+            Object.keys(activeTimers).forEach(id => {
+                clearInterval(activeTimers[id]);
+            });
+            activeTimers = {};
+            
+            ativos.forEach(atendimento => {
+                const card = document.createElement('div');
+                card.className = 'ativo-card';
+                const id = `ativo-timer-${atendimento.id}`;
+                card.innerHTML = `
+                    <div class="ativo-header">
+                        <div class="ativo-title">Leito ${atendimento.leito}</div>
+                        <div class="ativo-setor">${atendimento.setor}</div>
+                    </div>
+                    <div class="ativo-tempo" id="${id}">00:00:00</div>
+                    <div class="ativo-detail">
+                        <span class="ativo-label">Profissional:</span>
+                        <span>${atendimento.nome}</span>
+                    </div>
+                    <div class="ativo-detail">
+                        <span class="ativo-label">Motivo:</span>
+                        <span>${atendimento.motivo}</span>
+                    </div>
+                    ${atendimento.observacao ? `
+                    <div class="ativo-detail">
+                        <span class="ativo-label">Observações:</span>
+                        <span>${atendimento.observacao}</span>
+                    </div>` : ''}
+                `;
+                container.appendChild(card);
+                
+                // Iniciar temporizador para este atendimento
+                startActiveTimer(atendimento.id, atendimento.startTime, id);
+                
+                // Atualizar status do acionamento para "em_atendimento"
+                updateAcionamentoStatus(atendimento.leito, atendimento.setor, 'em_atendimento');
+            });
+        }
+        
+        function startActiveTimer(id, startTime, elementId) {
+            const start = new Date(startTime).getTime();
+            
+            // Atualizar imediatamente
+            updateActiveTimer(id, start, elementId);
+            
+            // Configurar intervalo de atualização
+            activeTimers[id] = setInterval(() => {
+                updateActiveTimer(id, start, elementId);
+            }, 1000);
+        }
+        
+        function updateActiveTimer(id, start, elementId) {
+            const now = new Date().getTime();
+            const elapsed = now - start;
+            
+            const hours = Math.floor(elapsed / (1000 * 60 * 60));
+            const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+            
+            const timerElement = document.getElementById(elementId);
+            if (timerElement) {
+                timerElement.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            }
+        }
+        
+        function updateAcionamentoStatus(leito, setor, novoStatus) {
+            const acionamentos = JSON.parse(localStorage.getItem('acionamentos')) || [];
+            
+            // Encontrar o acionamento mais recente para este leito/setor que não está concluído
+            const acionamento = acionamentos
+                .filter(a => a.leito === leito && a.setor === setor && a.status !== 'concluido')
+                .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))[0];
+            
+            if (acionamento) {
+                acionamento.status = novoStatus;
+                localStorage.setItem('acionamentos', JSON.stringify(acionamentos));
+            }
+        }
+        
+        function loadAtendimentos() {
+            const records = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
+            const container = document.getElementById('atendimentos-list');
+            
+            if (records.length === 0) {
+                container.innerHTML = '<div class="no-records">Nenhum atendimento registrado</div>';
+                return;
+            }
+
+            // Ordenar por data mais recente primeiro
+            const sortedRecords = [...records].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+            
+            container.innerHTML = '';
+            
+            sortedRecords.forEach(record => {
+                const startDate = new Date(record.startTime);
+                const endDate = new Date(record.endTime);
+                
+                // Se o atendimento foi concluído, garantir que o acionamento relacionado também está
+                if (record.status === 'completed' && record.endTime) {
+                    updateAcionamentoStatus(record.leito, record.setor, 'concluido');
+                }
+                
+                const card = document.createElement('div');
+                card.className = 'record-card';
+                card.innerHTML = `
+                    <button class="delete-btn" onclick="deleteRecord('activityRecords', ${record.id})">×</button>
+                    <div class="record-header">
+                        <div class="record-title">${record.leito}</div>
+                        <div class="record-setor">${record.setor}</div>
+                    </div>
+                    
+                    <div class="record-detail">
+                        <span class="detail-label">Profissional:</span>
+                        <span>${record.nome}</span>
+                    </div>
+                    
+                    <div class="record-detail">
+                        <span class="detail-label">Motivo:</span>
+                        <span>${record.motivo}</span>
+                    </div>
+                    
+                    ${record.observacao ? `
+                    <div class="record-detail">
+                        <span class="detail-label">Observações:</span>
+                        <span>${record.observacao}</span>
+                    </div>` : ''}
+                    
+                    <div class="record-time">
+                        <div><strong>Início:</strong> ${formatDateTime(startDate)}</div>
+                        ${record.endTime ? `
+                        <div><strong>Término:</strong> ${formatDateTime(endDate)}</div>
+                        <div class="record-duration">Duração: ${formatDuration(record.duration)}</div>
+                        ` : '<div><strong>Status:</strong> Em andamento</div>'}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        function loadAcionamentos() {
+            const acionamentos = filterRecords(JSON.parse(localStorage.getItem('acionamentos')) || [], true);
+            const container = document.getElementById('acionamentos-list');
+            
+            if (acionamentos.length === 0) {
+                container.innerHTML = '<div class="no-records">Nenhum acionamento registrado</div>';
+                return;
+            }
+            
+            // Ordenar por data mais recente primeiro
+            const sortedAcionamentos = [...acionamentos].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+            
+            container.innerHTML = '';
+            
+            sortedAcionamentos.forEach(acionamento => {
+                const dataHora = new Date(acionamento.dataHora);
+                const statusClass = getStatusClass(acionamento.status);
+                
+                const card = document.createElement('div');
+                card.className = 'record-card';
+                card.innerHTML = `
+                    <button class="delete-btn" onclick="deleteRecord('acionamentos', ${acionamento.id})">×</button>
+                    <div class="record-header">
+                        <div class="record-title">Leito ${acionamento.leito}</div>
+                        <div class="record-setor ${statusClass}">${formatStatus(acionamento.status)}</div>
+                    </div>
+                    
+                    <div class="record-detail">
+                        <span class="detail-label">Setor:</span>
+                        <span>${acionamento.setor}</span>
+                    </div>
+                    
+                    <div class="record-detail">
+                        <span class="detail-label">Solicitante:</span>
+                        <span>${acionamento.responsavel}</span>
+                    </div>
+                    
+                    <div class="record-time">
+                        <div><strong>Data/Hora:</strong> ${formatDateTime(dataHora)}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        function deleteRecord(storageKey, id) {
+            if (confirm('Tem certeza que deseja excluir este registro?')) {
+                let records = JSON.parse(localStorage.getItem(storageKey)) || [];
+                const recordToDelete = records.find(record => record.id === id);
+                
+                records = records.filter(record => record.id !== id);
+                localStorage.setItem(storageKey, JSON.stringify(records));
+                
+                // Se estiver deletando um atendimento concluído, atualizar o acionamento relacionado
+                if (storageKey === 'activityRecords' && recordToDelete && recordToDelete.status === 'completed') {
+                    updateAcionamentoStatus(recordToDelete.leito, recordToDelete.setor, 'concluido');
+                }
+                
+                loadAllData();
+            }
+        }
+        
+        function getStatusClass(status) {
+            switch(status) {
+                case 'pendente': return 'status-pendente';
+                case 'em_atendimento': return 'status-andamento';
+                case 'concluido': return 'status-concluido';
+                default: return '';
+            }
+        }
+        
+        function isToday(date) {
+            const today = new Date();
+            return date.getDate() === today.getDate() &&
+                   date.getMonth() === today.getMonth() &&
+                   date.getFullYear() === today.getFullYear();
+        }
+        
+        function formatDateTime(date) {
+            const options = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return date.toLocaleString('pt-BR', options);
+        }
+        
+        function formatDuration(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+        }
+        
+        function formatDurationShort(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else {
+                return `${minutes}m`;
+            }
+        }
+        
+        function formatStatus(status) {
+            switch(status) {
+                case 'pendente': return 'Pendente';
+                case 'em_atendimento': return 'Em Atendimento';
+                case 'concluido': return 'Concluído';
+                default: return status;
+            }
+        }
+        
+        function pad(num) {
+            return num.toString().padStart(2, '0');
+        }
+        
+        // Funções globais
+        window.deleteRecord = deleteRecord;
+    </script>
+</body>
+</html>
