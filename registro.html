@@ -496,7 +496,7 @@
         //     updateActiveRecordsDisplay();
         // }
         function loadActiveRecordsFromAPI() {
-        fetch('https://gestao-leitos.vercel.app/registro.html')
+        fetch('https://gestao-leitos.vercel.app/registros')
             .then(response => response.json())
             .then(data => {
                 activeRecords = {};
@@ -513,7 +513,7 @@
         }
 
         function updateAcionamentoStatusAPI(acionamentoId, novoStatus) {
-            return fetch(`https://gestao-leitos.vercel.app/acionamento.html/${acionamentoId}`, {
+            return fetch(`https://gestao-leitos.vercel.app/acionamentos/${acionamentoId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: novoStatus })
@@ -528,7 +528,7 @@
         //     updatePendingActivationsDisplay();
         // }
         function loadPendingActivations() {
-            fetch('https://gestao-leitos.vercel.app/acionamento.html')
+            fetch('https://gestao-leitos.vercel.app/acionamentos')
                 .then(response => response.json())
                 .then(data => {
                     // Filtra apenas os pendentes
@@ -615,7 +615,7 @@
         //     loadPendingActivations();
         // }
         function updateActivationStatus(id, newStatus) {
-            fetch(`https://gestao-leitos.vercel.app/acionamento.html/${id}`, {
+            fetch(`https://gestao-leitos.vercel.app/acionamentos/${id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -792,7 +792,7 @@
         //     localStorage.setItem('activityRecords', JSON.stringify(records));
         // }
         function saveCurrentRecord() {
-            fetch('https://gestao-leitos.vercel.app/registro.html', {
+            fetch('https://gestao-leitos.vercel.app/registros', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -813,7 +813,7 @@
         //     localStorage.setItem('activityRecords', JSON.stringify(records));
         // }
         function saveRecord(record) {
-            fetch('https://gestao-leitos.vercel.app/registro.html', {
+            fetch('https://gestao-leitos.vercel.app/registros', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -965,7 +965,7 @@
         // }    
 
 function updateRecord(record) {
-    return fetch(`https://gestao-leitos.vercel.app/registro.html/${record.id}`, {
+    return fetch(`https://gestao-leitos.vercel.app/registros/${record.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(record)
@@ -1074,7 +1074,7 @@ function updateRecord(record) {
                 // Atualiza o registro na API
                 updateRecord(completedRecord).then(() => {
                     // Atualiza o acionamento relacionado na API
-                    fetch('https://gestao-leitos.vercel.app/acionamento.html')
+                    fetch('https://gestao-leitos.vercel.app/acionamentos')
                         .then(resp => resp.json())
                         .then(acionamentos => {
                             const related = acionamentos.find(a =>
@@ -1083,7 +1083,7 @@ function updateRecord(record) {
                                 a.status === 'em_atendimento'
                             );
                             if (related) {
-                                fetch(`https://gestao-leitos.vercel.app/acionamento.html/${related.id}`, {
+                                fetch(`https://gestao-leitos.vercel.app/acionamentos/${related.id}`, {
                                     method: 'PATCH',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ status: 'concluido' })
