@@ -566,8 +566,8 @@
         async function loadAllData() {
             // Busque os dados da API
             const [atendResp, acionResp] = await Promise.all([
-                fetch('http://localhost:10000/registros'),
-                fetch('http://localhost:10000/acionamentos')
+                fetch('https://gestao-leitos.vercel.app/registros.html'),
+                fetch('https://gestao-leitos.vercel.app/acionamento.html')
             ]);
             atendimentos = filterRecords(await atendResp.json() || []);
             // acionamentos = filterRecords(await acionResp.json() || [], true);
