@@ -371,7 +371,9 @@
             
             <div class="btn-group">
                 <button id="start-btn" class="btn btn-start">Iniciar Terminal</button>
-                <button id="end-btn" class="btn btn-end" disabled>Finalizar Terminal</button>
+                <!-- <button id="end-btn" class="btn btn-end" disabled  >Finalizar Terminal</button> -->
+                <button id="end-btn" class="btn btn-end" disabled style="display: none;">Finalizar Terminal</button>
+
             </div>
         </div>
         
@@ -457,7 +459,7 @@
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             // Carregar atendimentos ativos do localStorage
-            loadActiveRecordsFromStorage();
+            loadActiveRecordsFromAPI();
             
             // Carregar acionamentos pendentes
             loadPendingActivations();
@@ -468,34 +470,74 @@
             
             // Atualizar a cada 5 segundos
             setInterval(updateActiveRecordsDisplay, 5000);
-            
+
+
             // Salvar estado ao sair da página
             window.addEventListener('beforeunload', saveCurrentState);
+            setInterval(loadPendingActivations, 5000);
         });
         
-        function loadActiveRecordsFromStorage() {
-            // Carrega atendimentos ativos do localStorage
-            const records = JSON.parse(localStorage.getItem('activityRecords')) || [];
-            activeRecords = {};
+        // function loadActiveRecordsFromStorage() {
+        //     // Carrega atendimentos ativos do localStorage
+        //     const records = JSON.parse(localStorage.getItem('activityRecords')) || [];
+        //     activeRecords = {};
             
-            records.forEach(record => {
-                if (record.status === 'active') {
-                    activeRecords[record.id] = record;
+        //     records.forEach(record => {
+        //         if (record.status === 'active') {
+        //             activeRecords[record.id] = record;
                     
-                    // Se não tiver um timer para este registro, inicia um
-                    if (!timers[record.id]) {
-                        startTimer(record.id);
-                    }
-                }
-            });
+        //             // Se não tiver um timer para este registro, inicia um
+        //             if (!timers[record.id]) {
+        //                 startTimer(record.id);
+        //             }
+        //         }
+        //     });
             
-            updateActiveRecordsDisplay();
+        //     updateActiveRecordsDisplay();
+        // }
+            function loadActiveRecordsFromAPI() {
+            fetch('http://localhost:10000/registros')
+                .then(response => response.json())
+                .then(data => {
+                    activeRecords = {};
+                    data.forEach(record => {
+                        if (record.status === 'active') {
+                            activeRecords[record.id] = record;
+                            if (!timers[record.id]) {
+                                startTimer(record.id);
+                            }
+                        }
+                    });
+                    updateActiveRecordsDisplay();
+                });
         }
-        
-        function loadPendingActivations() {
-            pendingActivations = JSON.parse(localStorage.getItem('acionamentos')) || [];
-            pendingActivations = pendingActivations.filter(a => a.status === 'pendente');
-            updatePendingActivationsDisplay();
+                function updateAcionamentoStatusAPI(acionamentoId, novoStatus) {
+            return fetch(`http://localhost:10000/acionamentos/${acionamentoId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: novoStatus })
+            });
+        }
+
+
+
+        // function loadPendingActivations() {
+        //     pendingActivations = JSON.parse(localStorage.getItem('acionamentos')) || [];
+        //     pendingActivations = pendingActivations.filter(a => a.status === 'pendente');
+        //     updatePendingActivationsDisplay();
+        // }
+                function loadPendingActivations() {
+            fetch('http://localhost:10000/acionamentos')
+                .then(response => response.json())
+                .then(data => {
+                    // Filtra apenas os pendentes
+                    pendingActivations = data.filter(a => a.status === 'pendente');
+                    updatePendingActivationsDisplay();
+                })
+                .catch(() => {
+                    pendingActivations = [];
+                    updatePendingActivationsDisplay();
+                });
         }
         
         function updatePendingActivationsDisplay() {
@@ -558,20 +600,29 @@
             updateActivationStatus(acionamento.id, 'em_atendimento');
         }
         
-        function updateActivationStatus(id, newStatus) {
-            let acionamentos = JSON.parse(localStorage.getItem('acionamentos')) || [];
-            acionamentos = acionamentos.map(a => {
-                if (a.id === id) {
-                    return {...a, status: newStatus};
-                }
-                return a;
-            });
-            localStorage.setItem('acionamentos', JSON.stringify(acionamentos));
+        // function updateActivationStatus(id, newStatus) {
+        //     let acionamentos = JSON.parse(localStorage.getItem('acionamentos')) || [];
+        //     acionamentos = acionamentos.map(a => {
+        //         if (a.id === id) {
+        //             return {...a, status: newStatus};
+        //         }
+        //         return a;
+        //     });
+        //     localStorage.setItem('acionamentos', JSON.stringify(acionamentos));
             
-            // Recarregar a lista de pendentes
-            loadPendingActivations();
+        //     // Recarregar a lista de pendentes
+        //     loadPendingActivations();
+        // }
+                function updateActivationStatus(id, newStatus) {
+            fetch(`http://localhost:10000/acionamentos/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(() => loadPendingActivations());
         }
-        
         function startRecording() {
             const nome = document.getElementById('nome').value;
             const setor = document.getElementById('setor').value;
@@ -728,30 +779,53 @@
             }
         }
         
+        // function saveCurrentRecord() {
+        //     let records = JSON.parse(localStorage.getItem('activityRecords')) || [];
+            
+        //     // Remove o registro antigo se existir
+        //     records = records.filter(r => r.id !== currentRecord.id);
+            
+        //     // Adiciona o registro atualizado
+        //     records.push(currentRecord);
+            
+        //     localStorage.setItem('activityRecords', JSON.stringify(records));
+        // }
         function saveCurrentRecord() {
-            let records = JSON.parse(localStorage.getItem('activityRecords')) || [];
-            
-            // Remove o registro antigo se existir
-            records = records.filter(r => r.id !== currentRecord.id);
-            
-            // Adiciona o registro atualizado
-            records.push(currentRecord);
-            
-            localStorage.setItem('activityRecords', JSON.stringify(records));
+            fetch('http://localhost:10000/registros', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(currentRecord)
+            });
         }
         
+        // function saveRecord(record) {
+        //     let records = JSON.parse(localStorage.getItem('activityRecords')) || [];
+            
+        //     // Remove o registro antigo se existir
+        //     records = records.filter(r => r.id !== record.id);
+            
+        //     // Adiciona o registro atualizado
+        //     records.push(record);
+            
+        //     localStorage.setItem('activityRecords', JSON.stringify(records));
+        // }
         function saveRecord(record) {
-            let records = JSON.parse(localStorage.getItem('activityRecords')) || [];
-            
-            // Remove o registro antigo se existir
-            records = records.filter(r => r.id !== record.id);
-            
-            // Adiciona o registro atualizado
-            records.push(record);
-            
-            localStorage.setItem('activityRecords', JSON.stringify(records));
+            fetch('http://localhost:10000/registros', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(record)
+            }).then(() => {
+                // Atualizar a lista de atendimentos ativos
+                loadActiveRecordsFromAPI();
+            });
         }
-        
+
+
+
         function saveCurrentState() {
             if (currentRecord.id) {
                 saveCurrentRecord();
@@ -842,19 +916,152 @@
             }
         }
         
-        function finishActiveRecord(recordId) {
+        // function finishActiveRecord(recordId) {
+        //     if (activeRecords[recordId]) {
+        //         const record = activeRecords[recordId];
+        //         const endTime = new Date();
+        //         const startTime = new Date(record.startTime);
+        //         const elapsed = endTime.getTime() - startTime.getTime();
+                
+        //         // Parar temporizador
+        //         if (timers[recordId]) {
+        //             clearInterval(timers[recordId].interval);
+        //             delete timers[recordId];
+        //         }
+                
+        //         // Completar registro
+        //         const completedRecord = {
+        //             ...record,
+        //             endTime: endTime,
+        //             duration: elapsed,
+        //             status: 'completed'
+        //         };
+        //         const relatedActivation = pendingActivations.find(a => 
+        //             a.setor === record.setor && 
+        //             a.leito === record.leito &&
+        //             a.status === 'em_atendimento'
+        //         );
+                
+        //         if (relatedActivation) {
+        //             updateActivationStatus(relatedActivation.id, 'concluido');
+        //         }
+                
+        //         // Remover dos ativos
+        //         delete activeRecords[recordId];
+        //         updateActiveRecordsDisplay();
+                
+        //         // Se for o registro atual, resetar interface
+        //         if (currentRecord.id === recordId) {
+        //             document.getElementById('timer').style.display = 'none';
+        //             document.getElementById('start-btn').disabled = false;
+        //             document.getElementById('end-btn').disabled = true;
+        //             document.getElementById('end-btn').classList.remove('pulse');
+        //             currentRecord = {};
+        //         }
+                
+        //         showStatus(`Atendimento ${record.leito} finalizado!`, 'success');
+        //     }
+        // }    
+
+function updateRecord(record) {
+    return fetch(`http://localhost:10000/registros/${record.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(record)
+    });
+}
+
+
+        // function finishActiveRecord(recordId) {
+        //     if (activeRecords[recordId]) {
+        //         const record = activeRecords[recordId];
+        //         const endTime = new Date();
+        //         const startTime = new Date(record.startTime);
+        //         const elapsed = endTime.getTime() - startTime.getTime();
+        
+        //         // Parar temporizador
+        //         if (timers[recordId]) {
+        //             clearInterval(timers[recordId].interval);
+        //             delete timers[recordId];
+        //         }
+        
+        //         // Completar registro
+        //         const completedRecord = {
+        //             ...record,
+        //             endTime: endTime,
+        //             duration: elapsed,
+        //             status: 'completed'
+        //         };
+        
+        //         // Salvar no histórico
+        //         saveRecord(completedRecord);
+        //         updateRecord(completedRecord)
+        //             .then(() => {
+        //                 // Atualizar a lista de atendimentos ativos
+        //                 loadActiveRecordsFromAPI();
+        //             })
+        //             .catch(error => {
+        //                 console.error('Erro ao atualizar registro:', error);
+        //             });
+        
+        //         // Atualizar status do acionamento para "concluido" se existir
+        //         const relatedActivation = pendingActivations.find(a => 
+        //             a.setor === record.setor && 
+        //             a.leito === record.leito &&
+        //             a.status === 'em_atendimento'
+        //         );
+        
+        //         if (relatedActivation) {
+        //             updateActivationStatus(relatedActivation.id, 'concluido');
+        //         }
+        
+        //         // Remover dos ativos
+        //         delete activeRecords[recordId];
+        //         updateActiveRecordsDisplay();
+        
+        //         // Se for o registro atual, resetar interface
+        //         if (currentRecord.id === recordId) {
+        //             document.getElementById('timer').style.display = 'none';
+        //             document.getElementById('start-btn').disabled = false;
+        //             document.getElementById('end-btn').disabled = true;
+        //             document.getElementById('end-btn').classList.remove('pulse');
+        //             currentRecord = {};
+        
+        //             // Limpar formulário
+        //             document.getElementById('nome').value = '';
+        //             document.getElementById('setor').value = '';
+        //             document.getElementById('motivo').value = '';
+        //             document.getElementById('observacao').value = '';
+        //             // Resetar campo de leito para input padrão
+        //             const leitoElement = document.getElementById('leito');
+        //             if (leitoElement.tagName === 'SELECT') {
+        //                 const input = document.createElement('input');
+        //                 input.type = 'text';
+        //                 input.id = 'leito';
+        //                 input.placeholder = 'Número do leito';
+        //                 leitoElement.parentNode.replaceChild(input, leitoElement);
+        //             } else {
+        //                 leitoElement.value = '';
+        //             }
+        //         }
+        
+        //         showStatus(`Atendimento ${record.leito} finalizado!`, 'success');
+        //     }
+        // }
+        
+            function finishActiveRecord(recordId) {
             if (activeRecords[recordId]) {
                 const record = activeRecords[recordId];
                 const endTime = new Date();
                 const startTime = new Date(record.startTime);
                 const elapsed = endTime.getTime() - startTime.getTime();
-                
+        
                 // Parar temporizador
                 if (timers[recordId]) {
                     clearInterval(timers[recordId].interval);
                     delete timers[recordId];
                 }
-                
+        
                 // Completar registro
                 const completedRecord = {
                     ...record,
@@ -862,37 +1069,43 @@
                     duration: elapsed,
                     status: 'completed'
                 };
-                
+        
+                // Atualiza o registro na API
+                updateRecord(completedRecord).then(() => {
+                    // Atualiza o acionamento relacionado na API
+                    fetch('http://localhost:10000/acionamentos')
+                        .then(resp => resp.json())
+                        .then(acionamentos => {
+                            const related = acionamentos.find(a =>
+                                a.leito === record.leito &&
+                                a.setor === record.setor &&
+                                a.status === 'em_atendimento'
+                            );
+                            if (related) {
+                                fetch(`http://localhost:10000/acionamentos/${related.id}`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ status: 'concluido' })
+                                });
+                            }
+                        })
+                        .finally(() => {
+                            // Atualize a interface
+                            delete activeRecords[recordId];
+                            updateActiveRecordsDisplay();
+                            // Limpe o formulário se necessário
+                        });
+                });
+            }
+        }
+
+
+
                 // Salvar no histórico
                 saveRecord(completedRecord);
                 
                 // Atualizar status do acionamento para "concluido" se existir
-                const relatedActivation = pendingActivations.find(a => 
-                    a.setor === record.setor && 
-                    a.leito === record.leito &&
-                    a.status === 'em_atendimento'
-                );
-                
-                if (relatedActivation) {
-                    updateActivationStatus(relatedActivation.id, 'concluido');
-                }
-                
-                // Remover dos ativos
-                delete activeRecords[recordId];
-                updateActiveRecordsDisplay();
-                
-                // Se for o registro atual, resetar interface
-                if (currentRecord.id === recordId) {
-                    document.getElementById('timer').style.display = 'none';
-                    document.getElementById('start-btn').disabled = false;
-                    document.getElementById('end-btn').disabled = true;
-                    document.getElementById('end-btn').classList.remove('pulse');
-                    currentRecord = {};
-                }
-                
-                showStatus(`Atendimento ${record.leito} finalizado!`, 'success');
-            }
-        }
+        
         
         function pad(num) {
             return num.toString().padStart(2, '0');

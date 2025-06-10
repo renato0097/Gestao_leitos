@@ -295,7 +295,7 @@
             // Salvar no localStorage
             saveAcionamento(acionamento);
             
-            showStatus('Acionamento registrado com sucesso!', 'success');
+            // showStatus('Acionamento registrado com sucesso!', 'success');
             
             // Limpar formulário
             document.getElementById('responsavel').value = '';
@@ -313,10 +313,47 @@
             }
         });
         
+        // function saveAcionamento(acionamento) {
+        //     let acionamentos = JSON.parse(localStorage.getItem('acionamentos')) || [];
+        //     acionamentos.push(acionamento);
+        //     localStorage.setItem('acionamentos', JSON.stringify(acionamentos));
+        // }
+
         function saveAcionamento(acionamento) {
-            let acionamentos = JSON.parse(localStorage.getItem('acionamentos')) || [];
-            acionamentos.push(acionamento);
-            localStorage.setItem('acionamentos', JSON.stringify(acionamentos));
+            fetch('http://localhost:10000/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(acionamento)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Erro ao salvar acionamento');
+                return response.json();
+            })
+            // .then(data => {
+            //     showStatus('Acionamento registrado com sucesso!', 'success');
+            //     // Limpar formulário aqui se quiser
+            // })
+            .then(data => {
+                showStatus('Acionamento registrado com sucesso!', 'success');
+                // Limpar formulário
+                document.getElementById('responsavel').value = '';
+                document.getElementById('setor').value = '';
+                const leitoElement = document.getElementById('leito');
+                if (leitoElement.tagName === 'SELECT') {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = 'leito';
+                    input.placeholder = 'Número do leito';
+                    leitoElement.parentNode.replaceChild(input, leitoElement);
+                } else {
+                    leitoElement.value = '';
+                }
+            })
+            .catch(error => {
+                showStatus('Erro ao registrar acionamento!', 'error');
+            });
         }
         
         function showStatus(message, type) {

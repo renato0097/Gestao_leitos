@@ -483,7 +483,7 @@
         
         <!-- Seção de Histórico de Atendimentos -->
         <div>
-            <h2>Terminais finalizadas</h2>
+            <h2>Terminais Finalizadas - Leitos Prontos</h2>
             <div class="records-container" id="atendimentos-list">
                 <!-- Preenchido por JavaScript -->
             </div>
@@ -500,6 +500,8 @@
     
     <script>
         // Variáveis globais
+        let acionamentos = [];
+        let atendimentos = [];
         let activeTimers = {};
         let currentFilters = {
             profissional: '',
@@ -553,44 +555,125 @@
             loadAllData();
         }
         
-        function loadAllData() {
+        // function loadAllData() {
+        //     loadStats();
+        //     loadAtivos();
+        //     loadAtendimentos();
+        //     loadAcionamentos();
+        // }
+
+        
+        async function loadAllData() {
+            // Busque os dados da API
+            const [atendResp, acionResp] = await Promise.all([
+                fetch('http://localhost:10000/registros'),
+                fetch('http://localhost:10000/acionamentos')
+            ]);
+            atendimentos = filterRecords(await atendResp.json() || []);
+            // acionamentos = filterRecords(await acionResp.json() || [], true);
+            acionamentos = await acionResp.json() || [];
+        
             loadStats();
             loadAtivos();
             loadAtendimentos();
             loadAcionamentos();
         }
-        
-        function loadStats() {
-            const atendimentos = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
-            const acionamentos = filterRecords(JSON.parse(localStorage.getItem('acionamentos')) || [], true);
+        // function loadStats() {
+        //     const atendimentos = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
+        //     // const acionamentos = filterRecords(JSON.parse(localStorage.getItem('acionamentos')) || [], true);
             
-            // Calcular estatísticas
+        //     // Calcular estatísticas
+        //     const totalAtendimentos = atendimentacionamentosos.length;
+        //     const totalAcionamentos = acionamentos.length;
+            
+        //     const atendimentosHoje = atendimentos.filter(a => {
+        //         const data = new Date(a.startTime);
+        //         return isToday(data);
+        //     }).length;
+            
+        //     const acionamentosHoje = acionamentos.filter(a => {
+        //         const data = new Date(a.dataHora);
+        //         return isToday(data);
+        //     }).length;
+            
+        //     const acionamentosPendentes = acionamentos.filter(a => a.status === 'pendente').length;
+        //     const acionamentosEmAtendimento = acionamentos.filter(a => a.status === 'em_atendimento').length;
+        //     const acionamentosConcluidos = acionamentos.filter(a => a.status === 'concluido').length;
+            
+        //     // Calcular tempo médio de atendimento (em milissegundos)
+        //     const atendimentosConcluidos = atendimentos.filter(a => a.status === 'completed' && a.duration);
+        //     let tempoMedio = 0;
+            
+        //     if (atendimentosConcluidos.length > 0) {
+        //         const totalTempo = atendimentosConcluidos.reduce((sum, a) => sum + a.duration, 0);
+        //         tempoMedio = totalTempo / atendimentosConcluidos.length;
+        //     }
+            
+        //     const container = document.getElementById('stats-container');
+        //     container.innerHTML = `
+        //         <div class="stat-card">
+        //             <div class="stat-value stat-total">${totalAtendimentos}</div>
+        //             <div class="stat-label">Total de Terminais</div>
+        //         </div>
+        //         <div class="stat-card">
+        //             <div class="stat-value stat-total">${totalAcionamentos}</div>
+        //             <div class="stat-label">Total de Acionamentos</div>
+        //         </div>
+        //         <div class="stat-card">
+        //             <div class="stat-value stat-hoje">${atendimentosHoje}</div>
+        //             <div class="stat-label">Terminais Hoje</div>
+        //         </div>
+        //         <div class="stat-card">
+        //             <div class="stat-value stat-hoje">${acionamentosHoje}</div>
+        //             <div class="stat-label">Acionamentos Hoje</div>
+        //         </div>
+        //         <div class="stat-card">
+        //             <div class="stat-value stat-pendente">${acionamentosPendentes}</div>
+        //             <div class="stat-label">Terminais Pendentes</div>
+        //         </div>
+        //         <div class="stat-card">
+        //             <div class="stat-value stat-andamento">${acionamentosEmAtendimento}</div>
+        //             <div class="stat-label">Em Atendimento</div>
+        //         </div>
+        //         <div class="stat-card">
+        //             <div class="stat-value stat-success">${acionamentosConcluidos}</div>
+        //             <div class="stat-label">Concluídos</div>
+        //         </div>
+        //         <div class="stat-card">
+        //             <div class="stat-value stat-media">${formatDurationShort(tempoMedio)}</div>
+        //             <div class="stat-label">Tempo Médio</div>
+        //         </div>
+        //     `;
+        // }
+        
+                function loadStats() {
+            // Use as variáveis globais já preenchidas pela API
             const totalAtendimentos = atendimentos.length;
             const totalAcionamentos = acionamentos.length;
-            
+        
             const atendimentosHoje = atendimentos.filter(a => {
                 const data = new Date(a.startTime);
                 return isToday(data);
             }).length;
-            
+        
             const acionamentosHoje = acionamentos.filter(a => {
                 const data = new Date(a.dataHora);
                 return isToday(data);
             }).length;
-            
+        
             const acionamentosPendentes = acionamentos.filter(a => a.status === 'pendente').length;
             const acionamentosEmAtendimento = acionamentos.filter(a => a.status === 'em_atendimento').length;
             const acionamentosConcluidos = acionamentos.filter(a => a.status === 'concluido').length;
-            
+        
             // Calcular tempo médio de atendimento (em milissegundos)
             const atendimentosConcluidos = atendimentos.filter(a => a.status === 'completed' && a.duration);
             let tempoMedio = 0;
-            
+        
             if (atendimentosConcluidos.length > 0) {
                 const totalTempo = atendimentosConcluidos.reduce((sum, a) => sum + a.duration, 0);
                 tempoMedio = totalTempo / atendimentosConcluidos.length;
             }
-            
+        
             const container = document.getElementById('stats-container');
             container.innerHTML = `
                 <div class="stat-card">
@@ -627,7 +710,6 @@
                 </div>
             `;
         }
-        
         function filterRecords(records, isAcionamento = false) {
             return records.filter(record => {
                 // Filtro por profissional
@@ -661,24 +743,74 @@
             });
         }
         
-        function loadAtivos() {
-            const records = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
-            const ativos = records.filter(record => record.status === 'active');
+        // function loadAtivos() {
+        //     const records = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
+        //     const ativos = records.filter(record => record.status === 'active');
             
+        //     const container = document.getElementById('ativos-container');
+        //     container.innerHTML = '';
+            
+        //     if (ativos.length === 0) {
+        //         container.innerHTML = '<div class="no-records">Nenhum atendimento em andamento no momento</div>';
+        //         return;
+        //     }
+            
+        //     // Parar todos os temporizadores antigos
+        //     Object.keys(activeTimers).forEach(id => {
+        //         clearInterval(activeTimers[id]);
+        //     });
+        //     activeTimers = {};
+            
+        //     ativos.forEach(atendimento => {
+        //         const card = document.createElement('div');
+        //         card.className = 'ativo-card';
+        //         const id = `ativo-timer-${atendimento.id}`;
+        //         card.innerHTML = `
+        //             <div class="ativo-header">
+        //                 <div class="ativo-title">Leito ${atendimento.leito}</div>
+        //                 <div class="ativo-setor">${atendimento.setor}</div>
+        //             </div>
+        //             <div class="ativo-tempo" id="${id}">00:00:00</div>
+        //             <div class="ativo-detail">
+        //                 <span class="ativo-label">Profissional:</span>
+        //                 <span>${atendimento.nome}</span>
+        //             </div>
+        //             <div class="ativo-detail">
+        //                 <span class="ativo-label">Motivo:</span>
+        //                 <span>${atendimento.motivo}</span>
+        //             </div>
+        //             ${atendimento.observacao ? `
+        //             <div class="ativo-detail">
+        //                 <span class="ativo-label">Observações:</span>
+        //                 <span>${atendimento.observacao}</span>
+        //             </div>` : ''}
+        //         `;
+        //         container.appendChild(card);
+                
+        //         // Iniciar temporizador para este atendimento
+        //         startActiveTimer(atendimento.id, atendimento.startTime, id);
+                
+        //         // Atualizar status do acionamento para "em_atendimento"
+        //         updateAcionamentoStatus(atendimento.leito, atendimento.setor, 'em_atendimento');
+        //     });
+        // }
+            function loadAtivos() {
+            // Filtra os atendimentos ativos
+            const ativos = atendimentos.filter(record => record.status === 'active');
             const container = document.getElementById('ativos-container');
             container.innerHTML = '';
-            
+        
             if (ativos.length === 0) {
                 container.innerHTML = '<div class="no-records">Nenhum atendimento em andamento no momento</div>';
                 return;
             }
-            
+        
             // Parar todos os temporizadores antigos
             Object.keys(activeTimers).forEach(id => {
                 clearInterval(activeTimers[id]);
             });
             activeTimers = {};
-            
+        
             ativos.forEach(atendimento => {
                 const card = document.createElement('div');
                 card.className = 'ativo-card';
@@ -704,15 +836,11 @@
                     </div>` : ''}
                 `;
                 container.appendChild(card);
-                
+        
                 // Iniciar temporizador para este atendimento
                 startActiveTimer(atendimento.id, atendimento.startTime, id);
-                
-                // Atualizar status do acionamento para "em_atendimento"
-                updateAcionamentoStatus(atendimento.leito, atendimento.setor, 'em_atendimento');
             });
         }
-        
         function startActiveTimer(id, startTime, elementId) {
             const start = new Date(startTime).getTime();
             
@@ -753,57 +881,170 @@
             }
         }
         
-        function loadAtendimentos() {
-            const records = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
-            const container = document.getElementById('atendimentos-list');
+        // function loadAtendimentos() {
+        //     const records = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
+        //     const container = document.getElementById('atendimentos-list');
             
-            if (records.length === 0) {
+        //     if (records.length === 0) {
+        //         container.innerHTML = '<div class="no-records">Nenhum atendimento registrado</div>';
+        //         return;
+        //     }
+
+        //     // Ordenar por data mais recente primeiro
+        //     const sortedRecords = [...records].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+            
+        //     container.innerHTML = '';
+            
+        //     sortedRecords.forEach(record => {
+        //         const startDate = new Date(record.startTime);
+        //         const endDate = new Date(record.endTime);
+                
+        //         // Se o atendimento foi concluído, garantir que o acionamento relacionado também está
+        //         if (record.status === 'completed' && record.endTime) {
+        //             updateAcionamentoStatus(record.leito, record.setor, 'concluido');
+        //         }
+                
+        //         const card = document.createElement('div');
+        //         card.className = 'record-card';
+        //         card.innerHTML = `
+        //             <button class="delete-btn" onclick="deleteRecord('activityRecords', ${record.id})">×</button>
+        //             <div class="record-header">
+        //                 <div class="record-title">${record.leito}</div>
+        //                 <div class="record-setor">${record.setor}</div>
+        //             </div>
+                    
+        //             <div class="record-detail">
+        //                 <span class="detail-label">Profissional:</span>
+        //                 <span>${record.nome}</span>
+        //             </div>
+                    
+        //             <div class="record-detail">
+        //                 <span class="detail-label">Motivo:</span>
+        //                 <span>${record.motivo}</span>
+        //             </div>
+                    
+        //             ${record.observacao ? `
+        //             <div class="record-detail">
+        //                 <span class="detail-label">Observações:</span>
+        //                 <span>${record.observacao}</span>
+        //             </div>` : ''}
+                    
+        //             <div class="record-time">
+        //                 <div><strong>Início:</strong> ${formatDateTime(startDate)}</div>
+        //                 ${record.endTime ? `
+        //                 <div><strong>Término:</strong> ${formatDateTime(endDate)}</div>
+        //                 <div class="record-duration">Duração: ${formatDuration(record.duration)}</div>
+        //                 ` : '<div><strong>Status:</strong> Em andamento</div>'}
+        //             </div>
+        //         `;
+        //         container.appendChild(card);
+        //     });
+        // }
+        
+        // function loadAcionamentos() {
+        //     const acionamentos = filterRecords(JSON.parse(localStorage.getItem('acionamentos')) || [], true);
+        //     const container = document.getElementById('acionamentos-list');
+            
+        //     if (acionamentos.length === 0) {
+        //         container.innerHTML = '<div class="no-records">Nenhum acionamento registrado</div>';
+        //         return;
+        //     }
+            
+        //     // Ordenar por data mais recente primeiro
+        //     const sortedAcionamentos = [...acionamentos].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+            
+        //     container.innerHTML = '';
+            
+        //     sortedAcionamentos.forEach(acionamento => {
+        //         const dataHora = new Date(acionamento.dataHora);
+        //         const statusClass = getStatusClass(acionamento.status);
+                
+        //         const card = document.createElement('div');
+        //         card.className = 'record-card';
+        //         card.innerHTML = `
+        //             <button class="delete-btn" onclick="deleteRecord('acionamentos', ${acionamento.id})">×</button>
+        //             <div class="record-header">
+        //                 <div class="record-title">Leito ${acionamento.leito}</div>
+        //                 <div class="record-setor ${statusClass}">${formatStatus(acionamento.status)}</div>
+        //             </div>
+                    
+        //             <div class="record-detail">
+        //                 <span class="detail-label">Setor:</span>
+        //                 <span>${acionamento.setor}</span>
+        //             </div>
+                    
+        //             <div class="record-detail">
+        //                 <span class="detail-label">Solicitante:</span>
+        //                 <span>${acionamento.responsavel}</span>
+        //             </div>
+                    
+        //             <div class="record-time">
+        //                 <div><strong>Data/Hora:</strong> ${formatDateTime(dataHora)}</div>
+        //             </div>
+        //         `;
+        //         container.appendChild(card);
+        //     });
+        // }
+        
+            function loadAtendimentos() {
+            const container = document.getElementById('atendimentos-list');
+        
+            if (atendimentos.length === 0) {
                 container.innerHTML = '<div class="no-records">Nenhum atendimento registrado</div>';
                 return;
             }
-
+        
             // Ordenar por data mais recente primeiro
-            const sortedRecords = [...records].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
-            
+            const sortedRecords = [...atendimentos].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+        
             container.innerHTML = '';
-            
+        
             sortedRecords.forEach(record => {
                 const startDate = new Date(record.startTime);
-                const endDate = new Date(record.endTime);
-                
+                const endDate = record.endTime ? new Date(record.endTime) : null;
+        
                 // Se o atendimento foi concluído, garantir que o acionamento relacionado também está
-                if (record.status === 'completed' && record.endTime) {
-                    updateAcionamentoStatus(record.leito, record.setor, 'concluido');
-                }
-                
+                // if (record.status === 'completed' && record.endTime) {
+                    // Aqui você pode chamar uma função para atualizar o status do acionamento na API, se necessário
+                    // Exemplo: updateAcionamentoStatus(record.leito, record.setor, 'concluido');
+                // }
+                  if (record.status === 'completed' && record.endTime) {
+            // Procura o acionamento relacionado em andamento
+            const relatedAcionamento = acionamentos.find(a =>
+                a.leito === record.leito &&
+                a.setor === record.setor &&
+                a.status === 'em_atendimento'
+            );
+            // if (relatedAcionamento) {
+            //     updateAcionamentoStatusAPI(relatedAcionamento.id, 'concluido');
+            // }
+        }
+
+
+        
                 const card = document.createElement('div');
                 card.className = 'record-card';
                 card.innerHTML = `
-                    <button class="delete-btn" onclick="deleteRecord('activityRecords', ${record.id})">×</button>
                     <div class="record-header">
                         <div class="record-title">${record.leito}</div>
                         <div class="record-setor">${record.setor}</div>
                     </div>
-                    
                     <div class="record-detail">
                         <span class="detail-label">Profissional:</span>
                         <span>${record.nome}</span>
                     </div>
-                    
                     <div class="record-detail">
                         <span class="detail-label">Motivo:</span>
                         <span>${record.motivo}</span>
                     </div>
-                    
                     ${record.observacao ? `
                     <div class="record-detail">
                         <span class="detail-label">Observações:</span>
                         <span>${record.observacao}</span>
                     </div>` : ''}
-                    
                     <div class="record-time">
                         <div><strong>Início:</strong> ${formatDateTime(startDate)}</div>
-                        ${record.endTime ? `
+                        ${endDate ? `
                         <div><strong>Término:</strong> ${formatDateTime(endDate)}</div>
                         <div class="record-duration">Duração: ${formatDuration(record.duration)}</div>
                         ` : '<div><strong>Status:</strong> Em andamento</div>'}
@@ -813,50 +1054,151 @@
             });
         }
         
-        function loadAcionamentos() {
-            const acionamentos = filterRecords(JSON.parse(localStorage.getItem('acionamentos')) || [], true);
+        
+        
+        
+        
+        
+        
+        
+        // async function loadAcionamentos() {
+        //     const response = await fetch('http://localhost:10000/acionamentos');
+        //     const data = await response.json();
+        //     const acionamentos = filterRecords(data || [], true);
+        
+        //     const container = document.getElementById('acionamentos-list');
+        //     container.innerHTML = '';
+        
+        //     if (acionamentos.length === 0) {
+        //         container.innerHTML = '<div class="no-records">Nenhum acionamento registrado</div>';
+        //         return;
+        //     }
+        
+        //     // Ordenar por data mais recente primeiro
+        //     const sortedAcionamentos = [...acionamentos].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+        
+        //     sortedAcionamentos.forEach(acionamento => {
+        //         const dataHora = new Date(acionamento.dataHora);
+        //         const statusClass = getStatusClass(acionamento.status);
+        
+        //         const card = document.createElement('div');
+        //         card.className = 'record-card';
+        //         card.innerHTML = `
+        //             <div class="record-header">
+        //                 <div class="record-title">Leito ${acionamento.leito}</div>
+        //                 <div class="record-setor ${statusClass}">${formatStatus(acionamento.status)}</div>
+        //             </div>
+        //             <div class="record-detail">
+        //                 <span class="detail-label">Setor:</span>
+        //                 <span>${acionamento.setor}</span>
+        //             </div>
+        //             <div class="record-detail">
+        //                 <span class="detail-label">Solicitante:</span>
+        //                 <span>${acionamento.responsavel}</span>
+        //             </div>
+        //             <div class="record-time">
+        //                 <div><strong>Data/Hora:</strong> ${formatDateTime(dataHora)}</div>
+        //             </div>
+        //         `;
+        //         container.appendChild(card);
+        //     });
+        // }
+        
+        //     async function loadAcionamentos() {
+        //     // Os dados já estão na variável global 'acionamentos' preenchida em loadAllData()
+        //     const container = document.getElementById('acionamentos-list');
+        //     container.innerHTML = '';
+        
+        //     if (acionamentos.length === 0) {
+        //         container.innerHTML = '<div class="no-records">Nenhum acionamento registrado</div>';
+        //         return;
+        //     }
+        
+        //     // Ordenar por data mais recente primeiro
+        //     const sortedAcionamentos = [...acionamentos].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+        
+        //     sortedAcionamentos.forEach(acionamento => {
+        //         const dataHora = new Date(acionamento.dataHora);
+        //         const statusClass = getStatusClass(acionamento.status);
+        
+        //         const card = document.createElement('div');
+        //         card.className = 'record-card';
+        //         card.innerHTML = `
+        //             <div class="record-header">
+        //                 <div class="record-title">Leito ${acionamento.leito}</div>
+        //                 <div class="record-setor ${statusClass}">${formatStatus(acionamento.status)}</div>
+        //             </div>
+        //             <div class="record-detail">
+        //                 <span class="detail-label">Setor:</span>
+        //                 <span>${acionamento.setor}</span>
+        //             </div>
+        //             <div class="record-detail">
+        //                 <span class="detail-label">Solicitante:</span>
+        //                 <span>${acionamento.responsavel}</span>
+        //             </div>
+        //             <div class="record-time">
+        //                 <div><strong>Data/Hora:</strong> ${formatDateTime(dataHora)}</div>
+        //             </div>
+        //         `;
+        //         container.appendChild(card);
+        //     });
+        // }
+        
+            function loadAcionamentos() {
             const container = document.getElementById('acionamentos-list');
-            
+            container.innerHTML = '';
+            console.log('Acionamentos:', acionamentos); // <-- Adicione esta linha
+
             if (acionamentos.length === 0) {
                 container.innerHTML = '<div class="no-records">Nenhum acionamento registrado</div>';
                 return;
             }
-            
-            // Ordenar por data mais recente primeiro
-            const sortedAcionamentos = [...acionamentos].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
-            
-            container.innerHTML = '';
-            
-            sortedAcionamentos.forEach(acionamento => {
-                const dataHora = new Date(acionamento.dataHora);
-                const statusClass = getStatusClass(acionamento.status);
-                
-                const card = document.createElement('div');
-                card.className = 'record-card';
-                card.innerHTML = `
-                    <button class="delete-btn" onclick="deleteRecord('acionamentos', ${acionamento.id})">×</button>
-                    <div class="record-header">
-                        <div class="record-title">Leito ${acionamento.leito}</div>
-                        <div class="record-setor ${statusClass}">${formatStatus(acionamento.status)}</div>
-                    </div>
-                    
-                    <div class="record-detail">
-                        <span class="detail-label">Setor:</span>
-                        <span>${acionamento.setor}</span>
-                    </div>
-                    
-                    <div class="record-detail">
-                        <span class="detail-label">Solicitante:</span>
-                        <span>${acionamento.responsavel}</span>
-                    </div>
-                    
-                    <div class="record-time">
-                        <div><strong>Data/Hora:</strong> ${formatDateTime(dataHora)}</div>
-                    </div>
-                `;
-                container.appendChild(card);
+        
+            // Agrupar por status
+            const statusOrder = ['pendente', 'em_atendimento', 'concluido'];
+            statusOrder.forEach(status => {
+                const group = acionamentos.filter(a => a.status === status);
+                if (group.length > 0) {
+                    // Adiciona um título para cada grupo
+                    const groupTitle = document.createElement('h3');
+                    groupTitle.textContent = formatStatus(status);
+                    groupTitle.style.marginTop = '30px';
+                    groupTitle.style.gridColumn = '1 / -1';
+                    container.appendChild(groupTitle);
+        
+                    group
+                        .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+                        .forEach(acionamento => {
+                            const dataHora = new Date(acionamento.dataHora);
+                            const statusClass = getStatusClass(acionamento.status);
+        
+                            const card = document.createElement('div');
+                            card.className = 'record-card';
+                            card.innerHTML = `
+                                <div class="record-header">
+                                    <div class="record-title">Leito ${acionamento.leito}</div>
+                                    <div class="record-setor ${statusClass}">${formatStatus(acionamento.status)}</div>
+                                </div>
+                                <div class="record-detail">
+                                    <span class="detail-label">Setor:</span>
+                                    <span>${acionamento.setor}</span>
+                                </div>
+                                <div class="record-detail">
+                                    <span class="detail-label">Solicitante:</span>
+                                    <span>${acionamento.responsavel}</span>
+                                </div>
+                                <div class="record-time">
+                                    <div><strong>Data/Hora:</strong> ${formatDateTime(dataHora)}</div>
+                                </div>
+                            `;
+                            container.appendChild(card);
+                        });
+                }
             });
         }
+        
+        
+        
         
         function deleteRecord(storageKey, id) {
             if (confirm('Tem certeza que deseja excluir este registro?')) {
