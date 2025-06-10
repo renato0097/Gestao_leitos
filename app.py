@@ -46,14 +46,14 @@ def receber_acionamento():
 #     # Retorna todos os acionamentos (ou filtre por status se quiser)
 #     return jsonify(acionamentos), 200
 
-@app.route('/registros', methods=['POST'])
+@app.route('/registro', methods=['POST'])
 def adicionar_registro():
     data = request.get_json()
     registros.append(data)
     print("Registro adicionado:", data)
     return jsonify({'success': True}), 200
 
-@app.route('/registros', methods=['GET'])
+@app.route('/registro', methods=['GET'])
 def listar_registros():
     return jsonify(registros), 200
 
@@ -67,7 +67,7 @@ def listar_registros():
 #             a['status'] = data.get('status', a['status'])
 #             return jsonify({'success': True}), 200
 #     return jsonify({'error': 'Registro não encontrado'}), 404
-@app.route('/registros/<int:registro_id>', methods=['PATCH'])
+@app.route('/registro/<int:registro_id>', methods=['PATCH'])
 def atualizar_registro(registro_id):
     data = request.get_json()
     for r in registros:
@@ -77,7 +77,7 @@ def atualizar_registro(registro_id):
     return jsonify({'error': 'Registro não encontrado'}), 404
 
 
-@app.route('/acionamentos/<int:acionamento_id>', methods=['PATCH'])
+@app.route('/acionamento/<int:acionamento_id>', methods=['PATCH'])
 def atualizar_acionamento(acionamento_id):
     data = request.get_json()
     for a in acionamentos:
@@ -87,7 +87,7 @@ def atualizar_acionamento(acionamento_id):
     return jsonify({'error': 'Acionamento não encontrado'}), 404
 
 
-@app.route('/acionamentos', methods=['GET'])
+@app.route('/acionamento', methods=['GET'])
 def listar_acionamentos():
     return jsonify(acionamentos), 200
 
