@@ -79,7 +79,7 @@ def atualizar_registro(registro_id):
 @app.route('/registros/<int:registro_id>', methods=['DELETE'])
 def deletar_registro(registro_id):
     global registros
-    registros = [r for r in registros if r.get('id') != registro_id]
+    registros = [r for r in registros if ["id"] != registro_id]
     return jsonify({'success': True}), 200
 
 # @app.route('/acionamentos/<int:acionamento_id>', methods=['DELETE'])
