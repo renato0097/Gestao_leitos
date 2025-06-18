@@ -811,19 +811,43 @@
             
         //     localStorage.setItem('activityRecords', JSON.stringify(records));
         // }
-        function saveRecord(record) {
-            fetch('https://gestao-leitos.onrender.com/registros', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(record)
-            }).then(() => {
-                // Atualizar a lista de atendimentos ativos
-                loadActiveRecordsFromAPI();
-            });
-        }
-
+        // function saveRecord(record) {
+        //     fetch('https://gestao-leitos.onrender.com/registros', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify(record)
+        //     }).then(() => {
+        //         // Atualizar a lista de atendimentos ativos
+        //         loadActiveRecordsFromAPI();
+        //     });
+        // }
+function saveRecord(record) {
+    // Se o registro já tem id, faça PATCH (atualização)
+    if (record.id) {
+        fetch(`https://gestao-leitos.onrender.com/registros/${record.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(record)
+        }).then(() => {
+            loadActiveRecordsFromAPI();
+        });
+    } else {
+        // Se não tem id, é novo: faça POST
+        fetch('https://gestao-leitos.onrender.com/registros', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(record)
+        }).then(() => {
+            loadActiveRecordsFromAPI();
+        });
+    }
+}
 
 
         function saveCurrentState() {
