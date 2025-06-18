@@ -662,7 +662,7 @@
             }).length;
         
             const acionamentosPendentes = acionamentos.filter(a => a.status === 'pendente').length;
-            const acionamentosEmAtendimento = acionamentos.filter(a => a.status === 'em_atendimento').length;
+            const acionamentosEmAtendimento = atendimentos.filter(a => a.status === 'active').length;
             const acionamentosConcluidos = acionamentos.filter(a => a.status === 'concluido').length;
         
             // Calcular tempo médio de atendimento (em milissegundos)
