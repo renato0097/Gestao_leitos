@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Terminais</title>
+    <!-- ...estilos permanecem iguais... -->
     <style>
         :root {
             --primary: #2c3e50;
@@ -324,8 +325,19 @@
                 <label for="nome">Nome do Profissional:</label>
                 <input type="text" id="nome" placeholder="Digite seu nome completo">
             </div>
-            
             <div class="form-group">
+                <label for="setor">Setor:</label>
+                <input type="text" id="setor" readonly>
+            </div>
+            <div class="form-group">
+                <label for="leito">Leito:</label>
+                <input type="text" id="leito" readonly>
+            </div>
+            <div class="form-group">
+                <label for="motivo">Motivo:</label>
+                <input type="text" id="motivo" readonly>
+            </div>
+            <!-- <div class="form-group">
                 <label for="setor">Setor:</label>
                 <select id="setor">
                     <option value="">Selecione o setor</option>
@@ -340,24 +352,23 @@
                     <option value="Unidade de Internação 2º Andar">Unidade de Internação 2º Andar</option>
                     <option value="Unidade de Internação 4º Andar">Unidade de Internação 4º Andar</option>
                 </select>
-            </div>
-            
+            </div> -->
+<!--                         
             <div class="form-group">
+                <label for="leito">Leito:</label>
+                <input type="text" id="leito" placeholder="Número do leito" >
+            </div> -->
+            <!-- <div class="form-group" >
                 <label for="motivo">Motivo:</label>
-                <select id="motivo">
+                <select id="motivo" >
                     <option value="">Selecione o motivo</option>
                     <option value="Alta">Alta</option>
                     <option value="Obito">Obito</option>
                     <option value="Transferência de leito">Transferência de leito</option>
                     <option value="Transferência por setor">Transferência por setor</option>
+                    <option value="Terminal Programada">Terminal Programada</option>
                 </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="leito">Leito:</label>
-                <input type="text" id="leito" placeholder="Número do leito">
-            </div>
-            
+            </div> -->
             <div class="form-group">
                 <label for="observacao">Observações:</label>
                 <textarea id="observacao" placeholder="Adicione observações relevantes"></textarea>
@@ -371,10 +382,9 @@
             
             <div class="btn-group">
                 <button id="start-btn" class="btn btn-start">Iniciar Terminal</button>
-                <!-- <button id="end-btn" class="btn btn-end" disabled  >Finalizar Terminal</button> -->
                 <button id="end-btn" class="btn btn-end" disabled style="display: none;">Finalizar Terminal</button>
-
             </div>
+
         </div>
         
         <div class="card" id="acionamentos-pendentes">
@@ -401,7 +411,7 @@
             "UTI NEO": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10","LEITO 11", "LEITO 12"],
             "Centro Cirúrgico": ["Sala 1", "Sala 2", "Sala 3", "Sala 4", "Sala 5", "Sala 6", "Sala 7", "Sala 8"],
             "Unidade de Internação 4º Andar": ["412", "414", "415", "416", "416 A", "416 B", "417", "417 A","417 B","418","419","420","421","422","423","424","424 A","424 B","425","425 A","425 B","426","426 A","426 B","427","427 A","427 B","428","428 A","428 B","429","429 A","429 B"],
-            "Unidade de Internação 2º Andar": ["201", "202", "202 A", "202 B", "202 C", "202 E", "203", "203 A","203 C","203 D","203 E","204","204 A","204 C","205","205 A","205 C","206","206 A","206 C","207","207 A","207 C","208","208 A","208 C","209","209 A","209 C","210","210 A","210 C","211 A","211 C","212","212 A","212 B","213","213 A","213 C","213 D","213 E"],
+            "Unidade de Internação 2º Andar": ["201", "202", "202 A", "202 B", "202 C", "202 E", "203", "203 A","203 C","203 D","203 E","204","204 A","204 C","205","205 A","205 C","206","206 A","206 C","207","207 A","207 C","208","208 A","208 C","209","209 A","209 C","210","210 A","210 C","211", "211 A","211 C","212","212 A","212 B","213","213 A","213 C","213 D","213 E"],
             "Pediatria": ["312", "312 A", "312 B", "312 B", "312 C", "313", "314", "314 A","314 B","315","315 A","315 B","316","316 A","316 B","316 C","316 D","317","317 A","317 B","317 C",],
             "Maternidade": ["301", "301 A", "301 B", "301 C", "302", "302 A", "302 B", "303","303 A","303 B","304","304 A","304 B","305","305 A","305 B","306","307","308","308 A","308 B","309","309 A","309 B","310","310 A","310 B","PPP 1","PPP 2","PPP 3","SALA OBSTÉTRICA 1","SALA OBSTÉTRICA 2"],
             "Pronto Socorro": ["OBS 1", "OBS 2", "OBS 3", "OBS 4", "OBS 5", "OBS 6", "OBS 7", "OBS 8","OBS 9","OBS 10","OBS 11","OBS 12"]
@@ -411,27 +421,17 @@
         document.getElementById('setor').addEventListener('change', function() {
             const setor = this.value;
             const leitoInput = document.getElementById('leito');
-            
-            // Limpar input de leito
             leitoInput.value = '';
-            
-            // Se um setor válido foi selecionado, transformar em select
             if (setor && setorLeitos[setor]) {
-                // Criar select se não existir
                 if (leitoInput.tagName === 'INPUT') {
                     const select = document.createElement('select');
                     select.id = 'leito';
                     select.innerHTML = '<option value="">Selecione o leito</option>';
-                    
-                    // Adicionar opções de leito
                     setorLeitos[setor].forEach(leito => {
                         select.innerHTML += `<option value="${leito}">${leito}</option>`;
                     });
-                    
-                    // Substituir input por select
                     leitoInput.parentNode.replaceChild(select, leitoInput);
                 } else {
-                    // Atualizar opções do select existente
                     const select = document.getElementById('leito');
                     select.innerHTML = '<option value="">Selecione o leito</option>';
                     setorLeitos[setor].forEach(leito => {
@@ -439,7 +439,6 @@
                     });
                 }
             } else {
-                // Se não houver setor selecionado ou não for um setor com leitos definidos, manter como input
                 if (leitoInput.tagName === 'SELECT') {
                     const input = document.createElement('input');
                     input.type = 'text';
@@ -458,44 +457,15 @@
         
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            // Carregar atendimentos ativos do localStorage
             loadActiveRecordsFromAPI();
-            
-            // Carregar acionamentos pendentes
             loadPendingActivations();
-            
-            // Configurar eventos
             document.getElementById('start-btn').addEventListener('click', startRecording);
             document.getElementById('end-btn').addEventListener('click', finishRecording);
-            
-            // Atualizar a cada 5 segundos
             setInterval(updateActiveRecordsDisplay, 5000);
-
-
-            // Salvar estado ao sair da página
-            window.addEventListener('beforeunload', saveCurrentState);
             setInterval(loadPendingActivations, 5000);
         });
-        
-        // function loadActiveRecordsFromStorage() {
-        //     // Carrega atendimentos ativos do localStorage
-        //     const records = JSON.parse(localStorage.getItem('activityRecords')) || [];
-        //     activeRecords = {};
-            
-        //     records.forEach(record => {
-        //         if (record.status === 'active') {
-        //             activeRecords[record.id] = record;
-                    
-        //             // Se não tiver um timer para este registro, inicia um
-        //             if (!timers[record.id]) {
-        //                 startTimer(record.id);
-        //             }
-        //         }
-        //     });
-            
-        //     updateActiveRecordsDisplay();
-        // }
-            function loadActiveRecordsFromAPI() {
+
+        function loadActiveRecordsFromAPI() {
             fetch('https://gestao-leitos.onrender.com/registros')
                 .then(response => response.json())
                 .then(data => {
@@ -511,26 +481,11 @@
                     updateActiveRecordsDisplay();
                 });
         }
-                function updateAcionamentoStatusAPI(acionamentoId, novoStatus) {
-            return fetch(`https://gestao-leitos.onrender.com/acionamentos/${acionamentoId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: novoStatus })
-            });
-        }
 
-
-
-        // function loadPendingActivations() {
-        //     pendingActivations = JSON.parse(localStorage.getItem('acionamentos')) || [];
-        //     pendingActivations = pendingActivations.filter(a => a.status === 'pendente');
-        //     updatePendingActivationsDisplay();
-        // }
-                function loadPendingActivations() {
+        function loadPendingActivations() {
             fetch('https://gestao-leitos.onrender.com/acionamentos')
                 .then(response => response.json())
                 .then(data => {
-                    // Filtra apenas os pendentes
                     pendingActivations = data.filter(a => a.status === 'pendente');
                     updatePendingActivationsDisplay();
                 })
@@ -539,19 +494,16 @@
                     updatePendingActivationsDisplay();
                 });
         }
-        
+
         function updatePendingActivationsDisplay() {
             const container = document.getElementById('pendentes-list');
             container.innerHTML = '';
-            
             if (pendingActivations.length === 0) {
                 container.innerHTML = '<p>Nenhum acionamento pendente</p>';
                 return;
             }
-            
             pendingActivations.forEach(acionamento => {
                 const dataHora = new Date(acionamento.dataHora);
-                
                 const item = document.createElement('div');
                 item.className = 'acionamento-pendente';
                 item.innerHTML = `
@@ -561,59 +513,51 @@
                     </div>
                     <div class="acionamento-details">
                         <div><strong>Solicitante:</strong> ${acionamento.responsavel}</div>
+                        <div><strong>Motivo:</strong> ${acionamento.motivo || ''}</div>
                     </div>
                     <div class="acionamento-time">
                         ${formatDateTime(dataHora)}
                     </div>
                 `;
-                
                 item.addEventListener('click', () => selectActivation(acionamento));
                 container.appendChild(item);
             });
         }
-        
-        function selectActivation(acionamento) {
-            // Preencher campos automaticamente
-            document.getElementById('setor').value = acionamento.setor;
-            
-            // Disparar evento change para atualizar os leitos
-            const event = new Event('change');
-            document.getElementById('setor').dispatchEvent(event);
-            
-            // Esperar um pouco para garantir que o select foi criado
-            setTimeout(() => {
-                const leitoSelect = document.getElementById('leito');
-                if (leitoSelect && leitoSelect.tagName === 'SELECT') {
-                    leitoSelect.value = acionamento.leito;
-                } else {
-                    document.getElementById('leito').value = acionamento.leito;
-                }
-            }, 100);
-            
-            // Mostrar mensagem
-            showStatus(`Acionamento do leito ${acionamento.leito} selecionado`, 'success');
-            
-            // Focar no campo de nome
-            document.getElementById('nome').focus();
-            
-            // Atualizar status do acionamento para "em atendimento"
-            updateActivationStatus(acionamento.id, 'em_atendimento');
-        }
-        
-        // function updateActivationStatus(id, newStatus) {
-        //     let acionamentos = JSON.parse(localStorage.getItem('acionamentos')) || [];
-        //     acionamentos = acionamentos.map(a => {
-        //         if (a.id === id) {
-        //             return {...a, status: newStatus};
+
+        // function selectActivation(acionamento) {
+        //     const event = new Event('change');
+        //     document.getElementById('setor').value = acionamento.setor;
+        //     document.getElementById('setor').dispatchEvent(event);
+        //     document.getElementById('motivo').value = acionamento.motivo || '';
+        //     setTimeout(() => {
+        //         const leitoSelect = document.getElementById('leito');
+        //         if (leitoSelect && leitoSelect.tagName === 'SELECT') {
+        //             leitoSelect.value = acionamento.leito;
+        //         } else {
+        //             document.getElementById('leito').value = acionamento.leito;
         //         }
-        //         return a;
-        //     });
-        //     localStorage.setItem('acionamentos', JSON.stringify(acionamentos));
-            
-        //     // Recarregar a lista de pendentes
-        //     loadPendingActivations();
+        //         const motivoInput = document.getElementById('motivo');
+        //         if (motivoInput) {
+        //             motivoInput.value = acionamento.motivo || '';
+        //         }
+        //     }, 100);
+        //     showStatus(`Acionamento do leito ${acionamento.leito} selecionado`, 'success');
+        //     document.getElementById('nome').focus();
+        //     updateActivationStatus(acionamento.id, 'em_atendimento');
         // }
-                function updateActivationStatus(id, newStatus) {
+        function selectActivation(acionamento) {
+            document.getElementById('setor').value = acionamento.setor;
+            document.getElementById('leito').value = acionamento.leito;
+            document.getElementById('motivo').value = acionamento.motivo || '';
+            showStatus(`Acionamento do leito ${acionamento.leito} selecionado`, 'success');
+            document.getElementById('nome').focus();
+            updateActivationStatus(acionamento.id, 'em_atendimento');
+                // window.onbeforeunload = function() {
+                //     return "Você selecionou um acionamento. Finalize ou devolva antes de sair.";
+                // };
+        }
+
+        function updateActivationStatus(id, newStatus) {
             fetch(`https://gestao-leitos.onrender.com/acionamentos/${id}`, {
                 method: 'PATCH',
                 headers: {
@@ -623,21 +567,22 @@
             })
             .then(() => loadPendingActivations());
         }
+
         function startRecording() {
+            // const setor = document.getElementById('setor').value;
+            // const motivo = document.getElementById('motivo').value;
+            // const leitoElement = document.getElementById('leito');
+            // const leito = leitoElement.value;
             const nome = document.getElementById('nome').value;
             const setor = document.getElementById('setor').value;
+            const leito = document.getElementById('leito').value;
             const motivo = document.getElementById('motivo').value;
-            const leitoElement = document.getElementById('leito');
-            const leito = leitoElement.value;
             const observacao = document.getElementById('observacao').value;
-            
             if (!nome || !setor || !motivo || !leito) {
                 showStatus('Por favor, preencha todos os campos obrigatórios!', 'error');
                 return;
             }
-            
             const recordId = Date.now();
-            
             currentRecord = {
                 id: recordId,
                 nome,
@@ -648,30 +593,20 @@
                 startTime: new Date(),
                 status: 'active'
             };
-            
-            // Iniciar temporizador
             startTimer(recordId);
-            
-            // Mostrar temporizador
             document.getElementById('timer').style.display = 'block';
             document.getElementById('start-btn').disabled = true;
             document.getElementById('end-btn').disabled = false;
             document.getElementById('end-btn').classList.add('pulse');
-            
             showStatus('Atendimento iniciado com sucesso!', 'success');
-            
-            // Adicionar aos registros ativos
             activeRecords[recordId] = currentRecord;
             updateActiveRecordsDisplay();
-            
-            // Salvar no localStorage
             saveCurrentRecord();
-            
             // Limpar formulário para novo registro
-            document.getElementById('motivo').value = '';
+            document.getElementById('nome').value = '';
+            // document.getElementById('setor').value = '';
+            // document.getElementById('motivo').value = '';
             document.getElementById('observacao').value = '';
-            
-            // Resetar campo de leito para input padrão
             if (leitoElement.tagName === 'SELECT') {
                 const input = document.createElement('input');
                 input.type = 'text';
@@ -682,91 +617,64 @@
                 leitoElement.value = '';
             }
         }
-        
+
         function startTimer(recordId) {
-            // Se já existir um timer para este registro, não criar outro
             if (timers[recordId]) return;
-            
             timers[recordId] = {
                 startTime: new Date().getTime(),
                 interval: setInterval(() => updateTimer(recordId), 1000)
             };
         }
-        
+
         function updateTimer(recordId) {
             if (!timers[recordId]) return;
-            
             const now = new Date().getTime();
             const elapsed = now - timers[recordId].startTime;
-            
             const hours = Math.floor(elapsed / (1000 * 60 * 60));
             const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
-            
-            // Atualizar display do temporizador principal se for o registro atual
             if (currentRecord.id === recordId) {
                 document.getElementById('time-display').textContent = 
                     `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
             }
-            
-            // Atualizar display na lista de atendimentos ativos
             const timerElement = document.getElementById(`timer-${recordId}`);
             if (timerElement) {
                 timerElement.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
             }
         }
-        
+
         function finishRecording() {
             if (!currentRecord.id) return;
-            
             const endTime = new Date();
             const elapsed = endTime.getTime() - timers[currentRecord.id].startTime;
-            
-            // Parar temporizador
             clearInterval(timers[currentRecord.id].interval);
             delete timers[currentRecord.id];
-            
-            // Completar registro
             currentRecord.endTime = endTime;
             currentRecord.duration = elapsed;
             currentRecord.status = 'completed';
-            
-            // Salvar no histórico
             saveRecord(currentRecord);
-            
             // Atualizar status do acionamento para "concluido" se existir
             const relatedActivation = pendingActivations.find(a => 
                 a.setor === currentRecord.setor && 
                 a.leito === currentRecord.leito &&
                 a.status === 'em_atendimento'
             );
-            
             if (relatedActivation) {
                 updateActivationStatus(relatedActivation.id, 'concluido');
             }
-            
-            // Remover dos registros ativos
             delete activeRecords[currentRecord.id];
             updateActiveRecordsDisplay();
-            
-            // Resetar interface
             document.getElementById('timer').style.display = 'none';
             document.getElementById('start-btn').disabled = false;
             document.getElementById('end-btn').disabled = true;
             document.getElementById('end-btn').classList.remove('pulse');
-            
             showStatus(`Atendimento finalizado! Tempo total: ${formatDuration(elapsed)}`, 'success');
-            
-            // Resetar registro atual
             currentRecord = {};
-            
             // Limpar formulário
-            document.getElementById('nome').value = '';
-            document.getElementById('setor').value = '';
-            document.getElementById('motivo').value = '';
+            // document.getElementById('nome').value = '';
+            // document.getElementById('setor').value = '';
+            // document.getElementById('motivo').value = '';
             document.getElementById('observacao').value = '';
-            
-            // Resetar campo de leito para input padrão
             const leitoElement = document.getElementById('leito');
             if (leitoElement.tagName === 'SELECT') {
                 const input = document.createElement('input');
@@ -778,18 +686,7 @@
                 leitoElement.value = '';
             }
         }
-        
-        // function saveCurrentRecord() {
-        //     let records = JSON.parse(localStorage.getItem('activityRecords')) || [];
-            
-        //     // Remove o registro antigo se existir
-        //     records = records.filter(r => r.id !== currentRecord.id);
-            
-        //     // Adiciona o registro atualizado
-        //     records.push(currentRecord);
-            
-        //     localStorage.setItem('activityRecords', JSON.stringify(records));
-        // }
+
         function saveCurrentRecord() {
             fetch('https://gestao-leitos.onrender.com/registros', {
                 method: 'POST',
@@ -799,72 +696,38 @@
                 body: JSON.stringify(currentRecord)
             });
         }
-        
-        // function saveRecord(record) {
-        //     let records = JSON.parse(localStorage.getItem('activityRecords')) || [];
-            
-        //     // Remove o registro antigo se existir
-        //     records = records.filter(r => r.id !== record.id);
-            
-        //     // Adiciona o registro atualizado
-        //     records.push(record);
-            
-        //     localStorage.setItem('activityRecords', JSON.stringify(records));
-        // }
-        // function saveRecord(record) {
-        //     fetch('https://gestao-leitos.onrender.com/registros', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json'
-        //         },
-        //         body: JSON.stringify(record)
-        //     }).then(() => {
-        //         // Atualizar a lista de atendimentos ativos
-        //         loadActiveRecordsFromAPI();
-        //     });
-        // }
-function saveRecord(record) {
-    // Se o registro já tem id, faça PATCH (atualização)
-    if (record.id) {
-        fetch(`https://gestao-leitos.onrender.com/registros/${record.id}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(record)
-        }).then(() => {
-            loadActiveRecordsFromAPI();
-        });
-    } else {
-        // Se não tem id, é novo: faça POST
-        fetch('https://gestao-leitos.onrender.com/registros', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(record)
-        }).then(() => {
-            loadActiveRecordsFromAPI();
-        });
-    }
-}
 
-
-        function saveCurrentState() {
-            if (currentRecord.id) {
-                saveCurrentRecord();
+        function saveRecord(record) {
+            if (record.id) {
+                fetch(`https://gestao-leitos.onrender.com/registros/${record.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(record)
+                }).then(() => {
+                    loadActiveRecordsFromAPI();
+                });
+            } else {
+                fetch('https://gestao-leitos.onrender.com/registros', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(record)
+                }).then(() => {
+                    loadActiveRecordsFromAPI();
+                });
             }
         }
-        
+
         function updateActiveRecordsDisplay() {
             const container = document.getElementById('atendimentos-list');
             container.innerHTML = '';
-            
             if (Object.keys(activeRecords).length === 0) {
                 container.innerHTML = '<p>Nenhum atendimento em andamento</p>';
                 return;
             }
-            
             Object.values(activeRecords).forEach(record => {
                 const card = document.createElement('div');
                 card.className = 'atendimento-card';
@@ -884,14 +747,11 @@ function saveRecord(record) {
                     </div>
                 `;
                 container.appendChild(card);
-                
-                // Atualizar o timer imediatamente
                 if (timers[record.id]) {
                     const elapsed = new Date().getTime() - timers[record.id].startTime;
                     const hours = Math.floor(elapsed / (1000 * 60 * 60));
                     const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((elapsed % (1000 * 60)) / 1000)
-                    
                     const timerElement = document.getElementById(`timer-${record.id}`);
                     if (timerElement) {
                         timerElement.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
@@ -899,204 +759,52 @@ function saveRecord(record) {
                 }
             });
         }
-        
+
         function focusRecord(recordId) {
             if (activeRecords[recordId]) {
-                // Parar temporizador atual se houver
                 if (currentRecord.id && timers[currentRecord.id]) {
                     clearInterval(timers[currentRecord.id].interval);
                 }
-                
-                // Definir novo registro atual
                 currentRecord = {...activeRecords[recordId]};
-                
-                // Preencher formulário
                 document.getElementById('nome').value = currentRecord.nome;
                 document.getElementById('setor').value = currentRecord.setor;
                 document.getElementById('motivo').value = currentRecord.motivo;
                 document.getElementById('leito').value = currentRecord.leito;
                 document.getElementById('observacao').value = currentRecord.observacao || '';
-                
-                // Mostrar temporizador
                 document.getElementById('timer').style.display = 'block';
                 document.getElementById('start-btn').disabled = true;
                 document.getElementById('end-btn').disabled = false;
                 document.getElementById('end-btn').classList.add('pulse');
-                
-                // Reiniciar temporizador visual
                 const elapsed = new Date().getTime() - new Date(currentRecord.startTime).getTime();
                 const hours = Math.floor(elapsed / (1000 * 60 * 60));
                 const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
                 document.getElementById('time-display').textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-                
-                // Reiniciar intervalo de atualização
                 timers[currentRecord.id] = {
                     startTime: new Date().getTime() - elapsed,
                     interval: setInterval(() => updateTimer(currentRecord.id), 1000)
                 };
-                
                 showStatus(`Atendimento ${currentRecord.leito} em foco`, 'success');
             }
         }
-        
-        // function finishActiveRecord(recordId) {
-        //     if (activeRecords[recordId]) {
-        //         const record = activeRecords[recordId];
-        //         const endTime = new Date();
-        //         const startTime = new Date(record.startTime);
-        //         const elapsed = endTime.getTime() - startTime.getTime();
-                
-        //         // Parar temporizador
-        //         if (timers[recordId]) {
-        //             clearInterval(timers[recordId].interval);
-        //             delete timers[recordId];
-        //         }
-                
-        //         // Completar registro
-        //         const completedRecord = {
-        //             ...record,
-        //             endTime: endTime,
-        //             duration: elapsed,
-        //             status: 'completed'
-        //         };
-        //         const relatedActivation = pendingActivations.find(a => 
-        //             a.setor === record.setor && 
-        //             a.leito === record.leito &&
-        //             a.status === 'em_atendimento'
-        //         );
-                
-        //         if (relatedActivation) {
-        //             updateActivationStatus(relatedActivation.id, 'concluido');
-        //         }
-                
-        //         // Remover dos ativos
-        //         delete activeRecords[recordId];
-        //         updateActiveRecordsDisplay();
-                
-        //         // Se for o registro atual, resetar interface
-        //         if (currentRecord.id === recordId) {
-        //             document.getElementById('timer').style.display = 'none';
-        //             document.getElementById('start-btn').disabled = false;
-        //             document.getElementById('end-btn').disabled = true;
-        //             document.getElementById('end-btn').classList.remove('pulse');
-        //             currentRecord = {};
-        //         }
-                
-        //         showStatus(`Atendimento ${record.leito} finalizado!`, 'success');
-        //     }
-        // }    
 
-function updateRecord(record) {
-    return fetch(`https://gestao-leitos.onrender.com/registros/${record.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(record)
-    });
-}
-
-
-        // function finishActiveRecord(recordId) {
-        //     if (activeRecords[recordId]) {
-        //         const record = activeRecords[recordId];
-        //         const endTime = new Date();
-        //         const startTime = new Date(record.startTime);
-        //         const elapsed = endTime.getTime() - startTime.getTime();
-        
-        //         // Parar temporizador
-        //         if (timers[recordId]) {
-        //             clearInterval(timers[recordId].interval);
-        //             delete timers[recordId];
-        //         }
-        
-        //         // Completar registro
-        //         const completedRecord = {
-        //             ...record,
-        //             endTime: endTime,
-        //             duration: elapsed,
-        //             status: 'completed'
-        //         };
-        
-        //         // Salvar no histórico
-        //         saveRecord(completedRecord);
-        //         updateRecord(completedRecord)
-        //             .then(() => {
-        //                 // Atualizar a lista de atendimentos ativos
-        //                 loadActiveRecordsFromAPI();
-        //             })
-        //             .catch(error => {
-        //                 console.error('Erro ao atualizar registro:', error);
-        //             });
-        
-        //         // Atualizar status do acionamento para "concluido" se existir
-        //         const relatedActivation = pendingActivations.find(a => 
-        //             a.setor === record.setor && 
-        //             a.leito === record.leito &&
-        //             a.status === 'em_atendimento'
-        //         );
-        
-        //         if (relatedActivation) {
-        //             updateActivationStatus(relatedActivation.id, 'concluido');
-        //         }
-        
-        //         // Remover dos ativos
-        //         delete activeRecords[recordId];
-        //         updateActiveRecordsDisplay();
-        
-        //         // Se for o registro atual, resetar interface
-        //         if (currentRecord.id === recordId) {
-        //             document.getElementById('timer').style.display = 'none';
-        //             document.getElementById('start-btn').disabled = false;
-        //             document.getElementById('end-btn').disabled = true;
-        //             document.getElementById('end-btn').classList.remove('pulse');
-        //             currentRecord = {};
-        
-        //             // Limpar formulário
-        //             document.getElementById('nome').value = '';
-        //             document.getElementById('setor').value = '';
-        //             document.getElementById('motivo').value = '';
-        //             document.getElementById('observacao').value = '';
-        //             // Resetar campo de leito para input padrão
-        //             const leitoElement = document.getElementById('leito');
-        //             if (leitoElement.tagName === 'SELECT') {
-        //                 const input = document.createElement('input');
-        //                 input.type = 'text';
-        //                 input.id = 'leito';
-        //                 input.placeholder = 'Número do leito';
-        //                 leitoElement.parentNode.replaceChild(input, leitoElement);
-        //             } else {
-        //                 leitoElement.value = '';
-        //             }
-        //         }
-        
-        //         showStatus(`Atendimento ${record.leito} finalizado!`, 'success');
-        //     }
-        // }
-        
-            function finishActiveRecord(recordId) {
+        function finishActiveRecord(recordId) {
             if (activeRecords[recordId]) {
                 const record = activeRecords[recordId];
                 const endTime = new Date();
                 const startTime = new Date(record.startTime);
                 const elapsed = endTime.getTime() - startTime.getTime();
-        
-                // Parar temporizador
                 if (timers[recordId]) {
                     clearInterval(timers[recordId].interval);
                     delete timers[recordId];
                 }
-        
-                // Completar registro
                 const completedRecord = {
                     ...record,
                     endTime: endTime,
                     duration: elapsed,
                     status: 'completed'
                 };
-        
-                // Atualiza o registro na API
                 updateRecord(completedRecord).then(() => {
-                    // Atualiza o acionamento relacionado na API
                     fetch('https://gestao-leitos.onrender.com/acionamentos')
                         .then(resp => resp.json())
                         .then(acionamentos => {
@@ -1114,27 +822,46 @@ function updateRecord(record) {
                             }
                         })
                         .finally(() => {
-                            // Atualize a interface
                             delete activeRecords[recordId];
                             updateActiveRecordsDisplay();
-                            // Limpe o formulário se necessário
+                            if (currentRecord.id === recordId) {
+                                document.getElementById('timer').style.display = 'none';
+                                document.getElementById('start-btn').disabled = false;
+                                document.getElementById('end-btn').disabled = true;
+                                document.getElementById('end-btn').classList.remove('pulse');
+                                currentRecord = {};
+                                document.getElementById('nome').value = '';
+                                document.getElementById('setor').value = '';
+                                document.getElementById('motivo').value = '';
+                                document.getElementById('observacao').value = '';
+                                const leitoElement = document.getElementById('leito');
+                                if (leitoElement.tagName === 'SELECT') {
+                                    const input = document.createElement('input');
+                                    input.type = 'text';
+                                    input.id = 'leito';
+                                    input.placeholder = 'Número do leito';
+                                    leitoElement.parentNode.replaceChild(input, leitoElement);
+                                } else {
+                                    leitoElement.value = '';
+                                }
+                            }
                         });
                 });
             }
         }
 
+        function updateRecord(record) {
+            return fetch(`https://gestao-leitos.onrender.com/registros/${record.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(record)
+            });
+        }
 
-
-                // Salvar no histórico
-                saveRecord(completedRecord);
-                
-                // Atualizar status do acionamento para "concluido" se existir
-        
-        
         function pad(num) {
             return num.toString().padStart(2, '0');
         }
-        
+
         function formatDateTime(date) {
             const options = {
                 day: '2-digit',
@@ -1145,29 +872,26 @@ function updateRecord(record) {
             };
             return date.toLocaleString('pt-BR', options);
         }
-        
+
         function formatDuration(milliseconds) {
             const totalSeconds = Math.floor(milliseconds / 1000);
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
             const seconds = totalSeconds % 60;
-            
             return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
         }
-        
+
         function showStatus(message, type) {
             const statusEl = document.getElementById('status');
             statusEl.textContent = message;
             statusEl.className = `status ${'status-' + type} active`;
-            
             setTimeout(() => {
                 statusEl.classList.remove('active');
             }, 5000);
         }
-        
-        // Funções globais para os botões
+
         window.focusRecord = focusRecord;
         window.finishActiveRecord = finishActiveRecord;
     </script>
 </body>
-</html>
+</html> 
