@@ -11,7 +11,7 @@
             --accent: #ec2610;
             --light: #ecf0f1;
             --dark: #2c3e50;
-            --success: #2ecc71;
+            --success: #070707;
             --warning: #ff9d00;
             --info: #3498db;
         }
@@ -120,7 +120,11 @@
         
         /* Novo estilo para o menu de filtros */
         .filters-menu {
-            margin-bottom: 20px;
+            position: relative;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
         
         .filters-toggle {
@@ -136,7 +140,7 @@
             width: 200px;
             font-weight: 600;
         }
-        
+
         .filters-toggle:hover {
             background-color: #1a252f;
         }
@@ -149,7 +153,7 @@
             transform: rotate(180deg);
         }
         
-        .filters-container {
+        /* .filters-container {
             background-color: white;
             border-radius: 10px;
             padding: 20px;
@@ -157,8 +161,22 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             display: none;
             animation: fadeIn 0.3s ease-out;
+        } */
+
+        .filters-container {
+            position: absolute;
+            top: 110%; /* logo abaixo do botão */
+            left: 0;
+            width: 350px; /* ajuste conforme necessário */
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+            z-index: 10;
         }
-        
         .filters-container.active {
             display: block;
         }
@@ -385,6 +403,40 @@
             background-color: rgba(46, 204, 113, 0.2);
             color: var(--success);
         }
+
+        .filters-toolbar {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+}
+
+        .visualizacao-group {
+            display: flex;
+            align-items: center;
+            width: 200px;
+            min-width: 200px;
+            margin-bottom: 0;
+}
+
+        #stats-view {
+            width: 100%;
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #2c3e50;
+            color: var(--light);
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+}
+        
+        #stats-view:focus {
+            border-color: var(--secondary);
+        }
         
         @keyframes slideDown {
             from {
@@ -419,52 +471,70 @@
     </header>
     
     <div class="container">
+        <div class="filters-toolbar">
+            <div class="visualizacao-group">
+                <label for="stats-view" style="display:none;">Visualização:</label>
+                <select id="stats-view">
+                    <option value="completa">Visualização Completa</option>
+                    <option value="dia">Visualização Do Dia</option>
+                </select>
+            </div>
         <!-- Novo menu de filtros -->
-        <div class="filters-menu">
-            <button class="filters-toggle" id="filters-toggle">
-                <span>Filtros</span>
-                <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="filters-container" id="filters-container">
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label for="filter-profissional">Profissional</label>
-                        <input type="text" id="filter-profissional" placeholder="Nome do profissional">
+            <div class="filters-menu">
+                <button class="filters-toggle" id="filters-toggle">
+                    <span>Filtros</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="filters-container" id="filters-container">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-profissional">Profissional</label>
+                            <input type="text" id="filter-profissional" placeholder="Nome do profissional">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-setor">Setor</label>
+                            <select id="filter-setor">
+                                <option value="">Selecione o setor</option>
+                        <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+                        <option value="Maternidade">Maternidade</option>
+                        <option value="Pediatria">Pediatria</option>
+                        <option value="Pronto Socorro">Pronto Socorro</option>
+                        <option value="UTI 1">UTI 1</option>
+                        <option value="UTI 2">UTI 2</option>
+                        <option value="UTI 3">UTI 3</option>
+                        <option value="UTI NEO">UTI NEO</option>
+                        <option value="Unidade de Internação 2º Andar">Unidade de Internação 2º Andar</option>
+                        <option value="Unidade de Internação 4º Andar">Unidade de Internação 4º Andar</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <label for="filter-setor">Setor</label>
-                        <select id="filter-setor">
-                            <option value="">Selecione o setor</option>
-                    <option value="Centro Cirúrgico">Centro Cirúrgico</option>
-                    <option value="Maternidade">Maternidade</option>
-                    <option value="Pediatria">Pediatria</option>
-                    <option value="Pronto Socorro">Pronto Socorro</option>
-                    <option value="UTI 1">UTI 1</option>
-                    <option value="UTI 2">UTI 2</option>
-                    <option value="UTI 3">UTI 3</option>
-                    <option value="UTI NEO">UTI NEO</option>
-                    <option value="Unidade de Internação 2º Andar">Unidade de Internação 2º Andar</option>
-                    <option value="Unidade de Internação 4º Andar">Unidade de Internação 4º Andar</option>
-                        </select>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-data-inicio">Data de início</label>
+                            <input type="date" id="filter-data-inicio">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-data-fim">Data de fim</label>
+                            <input type="date" id="filter-data-fim">
+                        </div>
                     </div>
-                </div>
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label for="filter-data-inicio">Data de início</label>
-                        <input type="date" id="filter-data-inicio">
+                    <div class="filter-actions">
+                        <button class="btn-filter btn-clear" id="clear-filters">Limpar</button>
+                        <button class="btn-filter" id="apply-filters">Aplicar Filtros</button>
                     </div>
-                    <div class="filter-group">
-                        <label for="filter-data-fim">Data de fim</label>
-                        <input type="date" id="filter-data-fim">
-                    </div>
-                </div>
-                <div class="filter-actions">
-                    <button class="btn-filter btn-clear" id="clear-filters">Limpar</button>
-                    <button class="btn-filter" id="apply-filters">Aplicar Filtros</button>
                 </div>
             </div>
+
+
+
+    <!-- <div class="visualizacao-group">
+        <label for="stats-view" style="display:none;">Visualização:</label>
+        <select id="stats-view">
+            <option value="completa">Visualização Completa</option>
+            <option value="dia">Visualização Do Dia</option>
+        </select>
+    </div> -->
         </div>
-        
         <!-- Seção de Estatísticas -->
         <div>
             <h2>Estatísticas em Tempo Real</h2>
@@ -526,6 +596,7 @@
             
             // Atualizar dados a cada 5 segundos
             setInterval(loadAllData, 5000);
+            document.getElementById('stats-view').addEventListener('change', loadStats);
         });
         
         function applyFilters() {
@@ -646,7 +717,8 @@
         //     `;
         // }
         
-                function loadStats() {
+        function loadStats() {
+            const view = document.getElementById('stats-view')?.value || 'completa';
             // Use as variáveis globais já preenchidas pela API
             const totalAtendimentos = atendimentos.length;
             const totalAcionamentos = acionamentos.length;
@@ -675,41 +747,50 @@
             }
         
             const container = document.getElementById('stats-container');
-            container.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-value stat-total">${totalAtendimentos}</div>
-                    <div class="stat-label">Total de Terminais</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value stat-total">${totalAcionamentos}</div>
-                    <div class="stat-label">Total de Acionamentos</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value stat-hoje">${atendimentosHoje}</div>
-                    <div class="stat-label">Terminais Hoje</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value stat-hoje">${acionamentosHoje}</div>
-                    <div class="stat-label">Acionamentos Hoje</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value stat-pendente">${acionamentosPendentes}</div>
-                    <div class="stat-label">Terminais Pendentes</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value stat-andamento">${acionamentosEmAtendimento}</div>
-                    <div class="stat-label">Em Atendimento</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value stat-success">${acionamentosConcluidos}</div>
-                    <div class="stat-label">Concluídos</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value stat-media">${formatDurationShort(tempoMedio)}</div>
-                    <div class="stat-label">Tempo Médio</div>
-                </div>
-            `;
-        }
+            let html = '';
+
+    if (view === 'completa') {
+        html += `
+            <div class="stat-card">
+                <div class="stat-value stat-total">${totalAtendimentos}</div>
+                <div class="stat-label">Total de Terminais</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value stat-total">${totalAcionamentos}</div>
+                <div class="stat-label">Total de Acionamentos</div>
+            </div>
+        `;
+    }
+
+    html += `
+        <div class="stat-card">
+            <div class="stat-value stat-hoje">${atendimentosHoje}</div>
+            <div class="stat-label">Terminais Hoje</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value stat-hoje">${acionamentosHoje}</div>
+            <div class="stat-label">Acionamentos Hoje</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value stat-pendente">${acionamentosPendentes}</div>
+            <div class="stat-label">Terminais Pendentes</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value stat-andamento">${acionamentosEmAtendimento}</div>
+            <div class="stat-label">Em Atendimento</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value stat-success">${acionamentosConcluidos}</div>
+            <div class="stat-label">Concluídos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value stat-media">${formatDurationShort(tempoMedio)}</div>
+            <div class="stat-label">Tempo Médio</div>
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
         function filterRecords(records, isAcionamento = false) {
             return records.filter(record => {
                 // Filtro por profissional
