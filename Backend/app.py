@@ -76,17 +76,17 @@ def atualizar_registro(registro_id):
             return jsonify({'success': True}), 200
     return jsonify({'error': 'Registro não encontrado'}), 404
 
-# @app.route('/registros/<int:registro_id>', methods=['DELETE'])
-# def deletar_registro(registro_id):
-#     global registros
-#     registros = [r for r in registros if r.get('id') != registro_id]
-#     return jsonify({'success': True}), 200
+@app.route('/registros/<int:registro_id>', methods=['DELETE'])
+def deletar_registro(registro_id):
+    global registros
+    registros = [r for r in registros if r.get('id') != registro_id]
+    return jsonify({'Registro removido com sucesso!': True}), 200
 
-# @app.route('/acionamentos/<int:acionamento_id>', methods=['DELETE'])
-# def deletar_acionamento(acionamento_id):
-#     global acionamentos
-#     acionamentos = [a for a in acionamentos if a.get('id') != acionamento_id]
-#     return jsonify({'success': True}), 200
+@app.route('/acionamentos/<int:acionamento_id>', methods=['DELETE'])
+def deletar_acionamento(acionamento_id):
+    global acionamentos
+    acionamentos = [a for a in acionamentos if a.get('id') != acionamento_id]
+    return jsonify({'Acionamento removido com sucesso!': True}), 200
 
 @app.route('/acionamentos/<int:acionamento_id>', methods=['PATCH'])
 def atualizar_acionamento(acionamento_id):
