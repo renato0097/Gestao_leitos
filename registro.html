@@ -382,6 +382,7 @@
             
             <div class="btn-group">
                 <button id="start-btn" class="btn btn-start">Iniciar Terminal</button>
+                <button id="return-btn" class="btn btn-warning" style="display:none; background-color: #0127ff;">Devolver Acionamento</button>
                 <button id="end-btn" class="btn btn-end" disabled style="display: none;">Finalizar Terminal</button>
             </div>
 
@@ -393,6 +394,11 @@
                 <!-- Acionamentos pendentes serão exibidos aqui -->
             </div>
         </div>
+
+           <div class="btn-group">
+                <!-- <button id="start-btn" class="btn btn-start">Iniciar Terminal</button> -->
+                <button id="end-btn" class="btn btn-end" disabled style="display: none;">Finalizar Terminal</button>
+            </div>
         
         <div id="atendimentos-ativos">
             <h3>Atendimentos em Andamento</h3>
@@ -463,6 +469,20 @@
             document.getElementById('end-btn').addEventListener('click', finishRecording);
             setInterval(updateActiveRecordsDisplay, 5000);
             setInterval(loadPendingActivations, 5000);
+            // Recupera acionamento selecionado do localStorage
+            const savedId = localStorage.getItem('selectedActivationId');
+            if (savedId) {
+                setTimeout(() => {
+                    fetch('https://gestao-leitos.onrender.com/acionamentos')
+                        .then(response => response.json())
+                        .then(data => {
+                            const acionamento = data.find(a => a.id == savedId && a.status === 'em_atendimento');
+                            if (acionamento) {
+                                selectActivation(acionamento);
+                            }
+                        });
+                }, 500);
+                }
         });
 
         function loadActiveRecordsFromAPI() {
@@ -551,12 +571,32 @@
             document.getElementById('motivo').value = acionamento.motivo || '';
             showStatus(`Acionamento do leito ${acionamento.leito} selecionado`, 'success');
             document.getElementById('nome').focus();
+            selectedActivationId = acionamento.id;
+            document.getElementById('return-btn').style.display = 'inline-block';
             updateActivationStatus(acionamento.id, 'em_atendimento');
-                // window.onbeforeunload = function() {
-                //     return "Você selecionou um acionamento. Finalize ou devolva antes de sair.";
-                // };
-        }
+                window.onbeforeunload = function() {
+                    return "Você selecionou um acionamento. Finalize ou devolva antes de sair.";
+                };
+                localStorage.setItem('selectedActivationId', acionamento.id); 
 
+        }
+                // Evento do botão devolver
+                document.getElementById('return-btn').addEventListener('click', function() {
+                    if (selectedActivationId) {
+                        updateActivationStatus(selectedActivationId, 'pendente');
+                        // Limpar campos
+                        document.getElementById('setor').value = '';
+                        document.getElementById('leito').value = '';
+                        document.getElementById('motivo').value = '';
+                        document.getElementById('nome').value = '';
+                        document.getElementById('observacao').value = '';
+                        selectedActivationId = null;
+                        document.getElementById('return-btn').style.display = 'none';
+                        showStatus('Acionamento devolvido aos pendentes.', 'success');
+                        window.onbeforeunload = null;
+                        localStorage.removeItem('selectedActivationId');
+                    }
+                });
         function updateActivationStatus(id, newStatus) {
             fetch(`https://gestao-leitos.onrender.com/acionamentos/${id}`, {
                 method: 'PATCH',
@@ -569,6 +609,10 @@
         }
 
         function startRecording() {
+            window.onbeforeunload = null;
+            localStorage.removeItem('selectedActivationId');
+            document.getElementById('return-btn').style.display = 'none';
+            selectedActivationId = null;
             // const setor = document.getElementById('setor').value;
             // const motivo = document.getElementById('motivo').value;
             // const leitoElement = document.getElementById('leito');
@@ -604,8 +648,9 @@
             saveCurrentRecord();
             // Limpar formulário para novo registro
             document.getElementById('nome').value = '';
-            // document.getElementById('setor').value = '';
-            // document.getElementById('motivo').value = '';
+            document.getElementById('setor').value = '';
+            document.getElementById('motivo').value = '';
+            document.getElementById('leito').value = '';
             document.getElementById('observacao').value = '';
             if (leitoElement.tagName === 'SELECT') {
                 const input = document.createElement('input');
@@ -794,6 +839,8 @@
                 const endTime = new Date();
                 const startTime = new Date(record.startTime);
                 const elapsed = endTime.getTime() - startTime.getTime();
+                activeRecords[recordId].observacao = document.getElementById('observacao').value;
+                currentRecord.observacao = document.getElementById('observacao').value;
                 if (timers[recordId]) {
                     clearInterval(timers[recordId].interval);
                     delete timers[recordId];
