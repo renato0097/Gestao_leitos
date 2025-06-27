@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,26 +14,26 @@
             --dark: #2c3e50;
             --success: #2ecc71;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
             background-color: #f5f7fa;
             color: var(--dark);
             min-height: 100vh;
         }
-        
+
         .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         header {
             background-color: var(--primary);
             color: white;
@@ -46,18 +47,18 @@
             flex-direction: column;
             align-items: center;
         }
-        
+
         .logo {
             width: 120px;
             height: auto;
             margin-bottom: 15px;
         }
-        
+
         h1 {
             font-size: 2.2rem;
             margin-bottom: 10px;
         }
-        
+
         .card {
             background-color: white;
             border-radius: 10px;
@@ -67,24 +68,25 @@
             transition: transform 0.3s, box-shadow 0.3s;
             animation: fadeIn 0.7s ease-out;
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: var(--primary);
         }
-        
-        input, select {
+
+        input,
+        select {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -92,12 +94,13 @@
             font-size: 16px;
             transition: border 0.3s;
         }
-        
-        input:focus, select:focus {
+
+        input:focus,
+        select:focus {
             border-color: var(--secondary);
             outline: none;
         }
-        
+
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -111,20 +114,20 @@
             transition: all 0.3s;
             text-align: center;
         }
-        
+
         .btn:hover {
             background-color: #2980b9;
             transform: translateY(-2px);
         }
-        
+
         .btn-primary {
             background-color: var(--primary);
         }
-        
+
         .btn-primary:hover {
             background-color: #1a252f;
         }
-        
+
         .status {
             text-align: center;
             padding: 10px;
@@ -134,37 +137,39 @@
             opacity: 0;
             transition: opacity 0.5s;
         }
-        
+
         .status.active {
             opacity: 1;
         }
-        
+
         .status-success {
             background-color: rgba(46, 204, 113, 0.2);
             color: var(--success);
         }
-        
+
         .status-error {
             background-color: rgba(231, 76, 60, 0.2);
             color: var(--accent);
         }
-        
+
         @keyframes slideDown {
             from {
                 transform: translateY(-100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
             }
         }
-        
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -172,20 +177,21 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <img src="logo.png" alt="Logo HCI" class="logo">
         <h1>Acionamento de Terminais</h1>
         <p>Registre um novo acionamento para Terminal</p>
     </header>
-    
+
     <div class="container">
         <div class="card">
             <div class="form-group">
                 <label for="responsavel">Nome do Responsável:</label>
                 <input type="text" id="responsavel" placeholder="Digite seu nome completo">
             </div>
-            
+
             <div class="form-group">
                 <label for="setor">Setor para Acionamento:</label>
                 <select id="setor">
@@ -200,17 +206,19 @@
                     <option value="UTI NEO">UTI NEO</option>
                     <option value="Unidade de Internação 2º Andar">Unidade de Internação 2º Andar</option>
                     <option value="Unidade de Internação 4º Andar">Unidade de Internação 4º Andar</option>
+                    <option value="Unidade de Internação 4º Andar">Unidade de Internação 4º Andar / Clinica Cirurgica
+                    </option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label for="leito">Leito:</label>
                 <input type="text" id="leito" placeholder="Número do leito">
             </div>
-            
+
             <div class="form-group">
                 <label for="motivo">Motivo:</label>
-                <select id="motivo" >
+                <select id="motivo">
                     <option value="">Selecione o motivo</option>
                     <option value="Alta">Alta</option>
                     <option value="Obito">Obito</option>
@@ -219,36 +227,50 @@
                     <option value="Terminal Programada">Terminal Programada</option>
                 </select>
             </div>
-            
+
             <div id="status" class="status"></div>
-            
+
             <button id="acionar-btn" class="btn btn-primary">Realizar Acionamento</button>
         </div>
     </div>
-    
+
     <script>
+        const setorPadronizado = {
+            "Centro Cirúrgico": "CENTRO CIRURGICO",
+            "Maternidade": "MATERNIDADE",
+            "Pediatria": "PEDIATRIA",
+            "Pronto Socorro": "PRONTO SOCORRO",
+            "UTI 1": "UTI 1",
+            "UTI 2": "UTI 2",
+            "UTI 3": "UTI 3",
+            "UTI NEO": "UTI NEO",
+            "Unidade de Internação 2º Andar": "UNIDADE INTERNACAO 2",
+            "Unidade de Internação 4º Andar": "UNIDADE INTERNACAO 4",
+            "Unidade de Internação 4º Andar / Clinica Cirurgica": "UNIDADE INTERNACAO 4 / CLINICA CIRURGICA"
+        };
         // Mapeamento de setores para leitos
         const setorLeitos = {
             "UTI 1": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10"],
             "UTI 2": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10"],
             "UTI 3": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10"],
-            "UTI NEO": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10","LEITO 11", "LEITO 12"],
+            "UTI NEO": ["LEITO 1", "LEITO 2", "LEITO 3", "LEITO 4", "LEITO 5", "LEITO 6", "LEITO 7", "LEITO 8", "LEITO 9", "LEITO 10", "LEITO 11", "LEITO 12"],
             "Centro Cirúrgico": ["Sala 1", "Sala 2", "Sala 3", "Sala 4", "Sala 5", "Sala 6", "Sala 7", "Sala 8"],
-            "Unidade de Internação 4º Andar": ["412", "414", "415", "416", "416 A", "416 B", "417", "417 A","417 B","418","419","420","421","422","423","424","424 A","424 B","425","425 A","425 B","426","426 A","426 B","427","427 A","427 B","428","428 A","428 B","429","429 A","429 B"],
-            "Unidade de Internação 2º Andar": ["201", "202", "202 A", "202 B", "202 C", "202 E", "203", "203 A","203 C","203 D","203 E","204","204 A","204 C","205","205 A","205 C","206","206 A","206 C","207","207 A","207 C","208","208 A","208 C","209","209 A","209 C","210","210 A","210 C","211 A","211 C","212","212 A","212 B","213","213 A","213 C","213 D","213 E"],
-            "Pediatria": ["312", "312 A", "312 B", "312 B", "312 C", "313", "314", "314 A","314 B","315","315 A","315 B","316","316 A","316 B","316 C","316 D","317","317 A","317 B","317 C",],
-            "Maternidade": ["301", "301 A", "301 B", "301 C", "302", "302 A", "302 B", "303","303 A","303 B","304","304 A","304 B","305","305 A","305 B","306","307","308","308 A","308 B","309","309 A","309 B","310","310 A","310 B","PPP 1","PPP 2","PPP 3","SALA OBSTÉTRICA 1","SALA OBSTÉTRICA 2"],
-            "Pronto Socorro": ["OBS 1", "OBS 2", "OBS 3", "OBS 4", "OBS 5", "OBS 6", "OBS 7", "OBS 8","OBS 9","OBS 10","OBS 11","OBS 12"]
+            "Unidade de Internação 4º Andar": ["412", "414", "415", "416", "416 A", "416 B", "417", "417 A", "417 B", "418", "419", "420", "421", "422", "423", "424", "424 A", "424 B", "425", "425 A", "425 B", "426", "426 A", "426 B", "427", "427 A", "427 B", "428", "428 A", "428 B", "429", "429 A", "429 B"],
+            "Unidade de Internação 4º Andar  Clinica Cirurgica": ["401", "402", "403", "404", "405", "405 A", "405 B", "406", "406 A", "406 B", "407", "407 A", "407 B", "408", "408 A", "408 B", "409", "409 A", "409 B", "410", "410 A", "410 B", "411", "411 A", "411 B"],
+            "Unidade de Internação 2º Andar": ["201", "202", "202 A", "202 B", "202 C", "202 E", "203", "203 A", "203 C", "203 D", "203 E", "204", "204 A", "204 C", "205", "205 A", "205 C", "206", "206 A", "206 C", "207", "207 A", "207 C", "208", "208 A", "208 C", "209", "209 A", "209 C", "210", "210 A", "210 C", "211 A", "211 C", "212", "212 A", "212 B", "213", "213 A", "213 C", "213 D", "213 E"],
+            "Pediatria": ["312", "312 A", "312 B", "312 B", "312 C", "313", "314", "314 A", "314 B", "315", "315 A", "315 B", "316", "316 A", "316 B", "316 C", "316 D", "317", "317 A", "317 B", "317 C",],
+            "Maternidade": ["301", "301 A", "301 B", "301 C", "302", "302 A", "302 B", "303", "303 A", "303 B", "304", "304 A", "304 B", "305", "305 A", "305 B", "306", "307", "308", "308 A", "308 B", "309", "309 A", "309 B", "310", "310 A", "310 B", "PPP 1", "PPP 2", "PPP 3", "SALA OBSTÉTRICA 1", "SALA OBSTÉTRICA 2"],
+            "Pronto Socorro": ["OBS 1", "OBS 2", "OBS 3", "OBS 4", "OBS 5", "OBS 6", "OBS 7", "OBS 8", "OBS 9", "OBS 10", "OBS 11", "OBS 12"]
         };
 
         // Atualizar opções de leito quando o setor muda
-        document.getElementById('setor').addEventListener('change', function() {
+        document.getElementById('setor').addEventListener('change', function () {
             const setor = this.value;
             const leitoInput = document.getElementById('leito');
-            
+
             // Limpar input de leito
             leitoInput.value = '';
-            
+
             // Se um setor válido foi selecionado, transformar em select
             if (setor && setorLeitos[setor]) {
                 // Criar select se não existir
@@ -256,12 +278,12 @@
                     const select = document.createElement('select');
                     select.id = 'leito';
                     select.innerHTML = '<option value="">Selecione o leito</option>';
-                    
+
                     // Adicionar opções de leito
                     setorLeitos[setor].forEach(leito => {
                         select.innerHTML += `<option value="${leito}">${leito}</option>`;
-                    });
-                    
+                    })
+
                     // Substituir input por select
                     leitoInput.parentNode.replaceChild(select, leitoInput);
                 } else {
@@ -284,50 +306,40 @@
             }
         });
 
-        document.getElementById('acionar-btn').addEventListener('click', function() {
+        document.getElementById('acionar-btn').addEventListener('click', function () {
             const responsavel = document.getElementById('responsavel').value;
-            const setor = document.getElementById('setor').value;
-            const motivo = document.getElementById('motivo').value; // <-- ADICIONE ESTA LINHA
-
+            const setorSelecionado = document.getElementById('setor').value;
+            const setor = setorPadronizado[setorSelecionado] || setorSelecionado;
+            const motivo = document.getElementById('motivo').value;
             const leitoElement = document.getElementById('leito');
             const leito = leitoElement.value;
-            
             if (!responsavel || !setor || !motivo || !leito) {
                 showStatus('Por favor, preencha todos os campos!', 'error');
                 return;
             }
-            
             const acionamento = {
                 id: Date.now(),
                 responsavel,
-                setor,
+                setor, // padronizado!
                 motivo,
                 leito,
                 dataHora: new Date(),
                 status: 'pendente'
             };
-            
-            // Salvar no localStorage
             saveAcionamento(acionamento);
-            
-            // showStatus('Acionamento registrado com sucesso!', 'success');
-            
-            // Limpar formulário
             document.getElementById('responsavel').value = '';
             document.getElementById('setor').value = '';
-            
-            // Resetar campo de leito para input padrão
             if (leitoElement.tagName === 'SELECT') {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.id = 'leito';
                 input.placeholder = 'Número do leito';
-                leitoInput.parentNode.replaceChild(input, leitoInput);
+                leitoElement.parentNode.replaceChild(input, leitoElement);
             } else {
                 leitoElement.value = '';
             }
         });
-        
+
         // function saveAcionamento(acionamento) {
         //     let acionamentos = JSON.parse(localStorage.getItem('acionamentos')) || [];
         //     acionamentos.push(acionamento);
@@ -342,44 +354,45 @@
                 },
                 body: JSON.stringify(acionamento)
             })
-            .then(response => {
-                if (!response.ok) throw new Error('Erro ao salvar acionamento');
-                return response.json();
-            })
-            // .then(data => {
-            //     showStatus('Acionamento registrado com sucesso!', 'success');
-            //     // Limpar formulário aqui se quiser
-            // }) 
-            .then(data => {
-                showStatus('Acionamento registrado com sucesso!', 'success');
-                // Limpar formulário
-                document.getElementById('responsavel').value = '';
-                document.getElementById('setor').value = '';
-                const leitoElement = document.getElementById('leito');
-                if (leitoElement.tagName === 'SELECT') {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.id = 'leito';
-                    input.placeholder = 'Número do leito';
-                    leitoElement.parentNode.replaceChild(input, leitoElement);
-                } else {
-                    leitoElement.value = '';
-                }
-            })
-            .catch(error => {
-                showStatus('Erro ao registrar acionamento!', 'error');
-            });
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro ao salvar acionamento');
+                    return response.json();
+                })
+                // .then(data => {
+                //     showStatus('Acionamento registrado com sucesso!', 'success');
+                //     // Limpar formulário aqui se quiser
+                // }) 
+                .then(data => {
+                    showStatus('Acionamento registrado com sucesso!', 'success');
+                    // Limpar formulário
+                    document.getElementById('responsavel').value = '';
+                    document.getElementById('setor').value = '';
+                    const leitoElement = document.getElementById('leito');
+                    if (leitoElement.tagName === 'SELECT') {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.id = 'leito';
+                        input.placeholder = 'Número do leito';
+                        leitoElement.parentNode.replaceChild(input, leitoElement);
+                    } else {
+                        leitoElement.value = '';
+                    }
+                })
+                .catch(error => {
+                    showStatus('Erro ao registrar acionamento!', 'error');
+                });
         }
-        
+
         function showStatus(message, type) {
             const statusEl = document.getElementById('status');
             statusEl.textContent = message;
             statusEl.className = `status ${'status-' + type} active`;
-            
+
             setTimeout(() => {
                 statusEl.classList.remove('active');
             }, 5000);
         }
     </script>
 </body>
+
 </html>

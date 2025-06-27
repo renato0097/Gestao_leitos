@@ -27,13 +27,55 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-
+import os
+from dotenv import load_dotenv
 app = Flask(__name__)
 CORS(app)
+
+load_dotenv()
+
+TOKENS_POR_SETOR = {
+    "UTI 1": os.getenv("TOKEN_UTI_1"),
+    "UTI 2": os.getenv("TOKEN_UTI_2"),
+    "UTI 3": os.getenv("TOKEN_UTI_3"),
+    "UTI NEO": os.getenv("TOKEN_UTI_NEO"),
+    "CENTRO CIRURGICO": os.getenv("TOKEN_CENTRO_CIRURGICO"),
+    "UNIDADE INTERNACAO 4": os.getenv("TOKEN_UNIDADE_INTERNACAO_4"),
+    "UNIDADE INTERNACAO 4 / CLINICA CIRURGICA": os.getenv("TOKEN_UNIDADE_INTERNACAO_4_CLINICA_CIRURGICA"),
+    "UNIDADE INTERNACAO 2": os.getenv("TOKEN_UNIDADE_INTERNACAO_2"),
+    "PEDIATRIA": os.getenv("TOKEN_PEDIATRIA"),
+    "MATERNIDADE": os.getenv("TOKEN_MATERNIDADE"),
+    "PRONTO SOCORRO": os.getenv("TOKEN_PRONTO_SOCORRO"),
+}
+
+VISUALIZACAO_TOKENS = {
+    os.getenv("TOKEN_VISUALIZACAO_TI"),
+    os.getenv("TOKEN_VISUALIZACAO_GL"),
+    os.getenv("TOKEN_VISUALIZACAO_SHL"),
+}
+
+def validar_token(token):
+    for setor, t in TOKENS_POR_SETOR.items():
+        if token == t:
+            return setor
+    return None
+
+def require_token(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        setor = validar_token(token)
+        if not setor:
+            return jsonify({'error': 'Token inválido ou ausente'}), 401
+        request.setor = setor
+        return f(*args, **kwargs)
+    return decorated
 
 # Lista para armazenar acionamentos
 acionamentos = []
 registros = []
+
 @app.route('/', methods=['POST'])
 def receber_acionamento():
     data = request.get_json()
@@ -41,45 +83,49 @@ def receber_acionamento():
     print("Dados API:", data)
     return jsonify({'success': True}), 200
 
-# @app.route('/registros', methods=['GET'])
-# def listar_acionamentos():
-#     # Retorna todos os acionamentos (ou filtre por status se quiser)
-#     return jsonify(acionamentos), 200
-
 @app.route('/registros', methods=['POST'])
+@require_token
 def adicionar_registro():
     data = request.get_json()
+    # Só aceita se o setor do acionamento for igual ao setor do token
+    if data.get('setor', '').strip().lower() != request.setor.strip().lower():
+        return jsonify({'error': 'Setor do registro não corresponde ao setor do token'}), 403
     registros.append(data)
     print("Registro adicionado:", data)
     return jsonify({'success': True}), 200
 
 @app.route('/registros', methods=['GET'])
+@require_token
 def listar_registros():
+    setor = request.setor
+    registros_do_setor = [r for r in registros if r.get('setor') == setor]
+    return jsonify(registros_do_setor), 200
+
+@app.route('/registros_admin', methods=['GET'])
+def listar_registros_admin():
+    token = request.headers.get('Authorization')
+    if not token or token not in VISUALIZACAO_TOKENS:
+        return jsonify({'error': 'Token de visualização inválido ou ausente'}), 401
     return jsonify(registros), 200
 
 
-
-# @app.route('/registros/<int:registro_id>', methods=['PATCH'])
-# def atualizar_status(registro_id):
-#     data = request.get_json()
-#     for a in acionamentos:
-#         if a.get('id') == registro_id:
-#             a['status'] = data.get('status', a['status'])
-#             return jsonify({'success': True}), 200
-#     return jsonify({'error': 'Registro não encontrado'}), 404
 @app.route('/registros/<int:registro_id>', methods=['PATCH'])
+@require_token
 def atualizar_registro(registro_id):
+    setor = request.setor
     data = request.get_json()
     for r in registros:
-        if r.get('id') == registro_id:
+        if r.get('id') == registro_id and r.get('setor') == setor:
             r.update(data)
             return jsonify({'success': True}), 200
-    return jsonify({'error': 'Registro não encontrado'}), 404
+    return jsonify({'error': 'Registro não encontrado ou sem permissão'}), 404
 
 @app.route('/registros/<int:registro_id>', methods=['DELETE'])
+@require_token
 def deletar_registro(registro_id):
     global registros
-    registros = [r for r in registros if r.get('id') != registro_id]
+    setor = request.setor
+    registros = [r for r in registros if not (r.get('id') == registro_id and r.get('setor') == setor)]
     return jsonify({'Registro removido com sucesso!': True}), 200
 
 @app.route('/acionamentos/<int:acionamento_id>', methods=['DELETE'])
@@ -96,7 +142,6 @@ def atualizar_acionamento(acionamento_id):
             a.update(data)
             return jsonify({'success': True}), 200
     return jsonify({'error': 'Acionamento não encontrado'}), 404
-
 
 @app.route('/acionamentos', methods=['GET'])
 def listar_acionamentos():
