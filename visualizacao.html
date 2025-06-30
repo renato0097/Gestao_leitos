@@ -419,28 +419,42 @@
         }
 
         .visualizacao-group {
+            position: relative;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .visualizacao-toggle {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             width: 200px;
-            min-width: 200px;
-            margin-bottom: 0;
+            font-weight: 600;
+            position: relative;
         }
 
-        #stats-view {
+        .visualizacao-toggle i {
+            margin-left: 10px;
+            transition: transform 0.3s;
+        }
+
+        .visualizacao-select {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 10px 20px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: #2c3e50;
-            color: var(--light);
-            outline: none;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
-        }
-
-        #stats-view:focus {
-            border-color: var(--secondary);
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
         }
 
         @keyframes slideDown {
@@ -481,11 +495,14 @@
     <div class="container">
         <div class="filters-toolbar">
             <div class="visualizacao-group">
-                <label for="stats-view" style="display:none;">Visualização:</label>
-                <select id="stats-view">
-                    <option value="completa">Visualização Completa</option>
-                    <option value="dia">Visualização Do Dia</option>
-                </select>
+                <button class="visualizacao-toggle" id="visualizacao-toggle" tabindex="-1">
+                    <span id="visualizacao-label">Visualização Completa</span>
+                    <i class="fas fa-chevron-down"></i>
+                    <select id="stats-view" class="visualizacao-select" aria-label="Tipo de visualização">
+                        <option value="completa">Visualização Completa</option>
+                        <option value="dia">Visualização Do Dia</option>
+                    </select>
+                </button>
             </div>
             <!-- Novo menu de filtros -->
             <div class="filters-menu">
@@ -503,7 +520,7 @@
                             <label for="filter-setor">Setor</label>
                             <select id="filter-setor">
                                 <option value="">Selecione o setor</option>
-                                <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+                                <option value="Centro Cirurgico">Centro Cirúrgico</option>
                                 <option value="Maternidade">Maternidade</option>
                                 <option value="Pediatria">Pediatria</option>
                                 <option value="Pronto Socorro">Pronto Socorro</option>
@@ -513,6 +530,8 @@
                                 <option value="UTI NEO">UTI NEO</option>
                                 <option value="Unidade de Internação 2º Andar">Unidade de Internação 2º Andar</option>
                                 <option value="Unidade de Internação 4º Andar">Unidade de Internação 4º Andar</option>
+                                <option value="Unidade de Internação 4º Andar / Clinica Cirurgica">Unidade de Internação 4º Andar / Clinica Cirurgica </option>
+
                             </select>
                         </div>
                     </div>
@@ -532,17 +551,8 @@
                     </div>
                 </div>
             </div>
-
-
-
-            <!-- <div class="visualizacao-group">
-        <label for="stats-view" style="display:none;">Visualização:</label>
-        <select id="stats-view">
-            <option value="completa">Visualização Completa</option>
-            <option value="dia">Visualização Do Dia</option>
-        </select>
-    </div> -->
         </div>
+
         <!-- Seção de Estatísticas -->
         <div>
             <h2>Estatísticas em Tempo Real</h2>
@@ -559,6 +569,14 @@
             </div>
         </div>
 
+        <!-- Seção de Histórico de Acionamentos -->
+        <div>
+            <h2>Histórico de Acionamentos</h2>
+            <div class="records-container" id="acionamentos-list">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </div>
+        
         <!-- Seção de Histórico de Atendimentos -->
         <div>
             <h2>Terminais Finalizadas - Leitos Prontos</h2>
@@ -567,13 +585,6 @@
             </div>
         </div>
 
-        <!-- Seção de Histórico de Acionamentos -->
-        <div>
-            <h2>Histórico de Acionamentos</h2>
-            <div class="records-container" id="acionamentos-list">
-                <!-- Preenchido por JavaScript -->
-            </div>
-        </div>
     </div>
 
     <script>
@@ -614,7 +625,15 @@
 
             // Atualizar dados a cada 5 segundos
             setInterval(loadAllData, 5000);
-            document.getElementById('stats-view').addEventListener('change', loadStats);
+            document.getElementById('stats-view').addEventListener('change', function(e) {
+                const label = document.getElementById('visualizacao-label');
+                label.textContent = this.options[this.selectedIndex].text;
+                loadStats();
+            });
+            // Inicializa o label com o valor atual
+            const statsView = document.getElementById('stats-view');
+            const label = document.getElementById('visualizacao-label');
+            label.textContent = statsView.options[statsView.selectedIndex].text;
         });
 
         function applyFilters() {
@@ -669,135 +688,51 @@
             loadAtendimentos();
             loadAcionamentos();
         }
-        // function loadStats() {
-        //     const atendimentos = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
-        //     // const acionamentos = filterRecords(JSON.parse(localStorage.getItem('acionamentos')) || [], true);
-
-        //     // Calcular estatísticas
-        //     const totalAtendimentos = atendimentacionamentosos.length;
-        //     const totalAcionamentos = acionamentos.length;
-
-        //     const atendimentosHoje = atendimentos.filter(a => {
-        //         const data = new Date(a.startTime);
-        //         return isToday(data);
-        //     }).length;
-
-        //     const acionamentosHoje = acionamentos.filter(a => {
-        //         const data = new Date(a.dataHora);
-        //         return isToday(data);
-        //     }).length;
-
-        //     const acionamentosPendentes = acionamentos.filter(a => a.status === 'pendente').length;
-        //     const acionamentosEmAtendimento = acionamentos.filter(a => a.status === 'em_atendimento').length;
-        //     const acionamentosConcluidos = acionamentos.filter(a => a.status === 'concluido').length;
-
-        //     // Calcular tempo médio de atendimento (em milissegundos)
-        //     const atendimentosConcluidos = atendimentos.filter(a => a.status === 'completed' && a.duration);
-        //     let tempoMedio = 0;
-
-        //     if (atendimentosConcluidos.length > 0) {
-        //         const totalTempo = atendimentosConcluidos.reduce((sum, a) => sum + a.duration, 0);
-        //         tempoMedio = totalTempo / atendimentosConcluidos.length;
-        //     }
-
-        //     const container = document.getElementById('stats-container');
-        //     container.innerHTML = `
-        //         <div class="stat-card">
-        //             <div class="stat-value stat-total">${totalAtendimentos}</div>
-        //             <div class="stat-label">Total de Terminais</div>
-        //         </div>
-        //         <div class="stat-card">
-        //             <div class="stat-value stat-total">${totalAcionamentos}</div>
-        //             <div class="stat-label">Total de Acionamentos</div>
-        //         </div>
-        //         <div class="stat-card">
-        //             <div class="stat-value stat-hoje">${atendimentosHoje}</div>
-        //             <div class="stat-label">Terminais Hoje</div>
-        //         </div>
-        //         <div class="stat-card">
-        //             <div class="stat-value stat-hoje">${acionamentosHoje}</div>
-        //             <div class="stat-label">Acionamentos Hoje</div>
-        //         </div>
-        //         <div class="stat-card">
-        //             <div class="stat-value stat-pendente">${acionamentosPendentes}</div>
-        //             <div class="stat-label">Terminais Pendentes</div>
-        //         </div>
-        //         <div class="stat-card">
-        //             <div class="stat-value stat-andamento">${acionamentosEmAtendimento}</div>
-        //             <div class="stat-label">Em Atendimento</div>
-        //         </div>
-        //         <div class="stat-card">
-        //             <div class="stat-value stat-success">${acionamentosConcluidos}</div>
-        //             <div class="stat-label">Concluídos</div>
-        //         </div>
-        //         <div class="stat-card">
-        //             <div class="stat-value stat-media">${formatDurationShort(tempoMedio)}</div>
-        //             <div class="stat-label">Tempo Médio</div>
-        //         </div>
-        //     `;
-        // }
 
         function loadStats() {
             const view = document.getElementById('stats-view')?.value || 'completa';
             // Use as variáveis globais já preenchidas pela API
-            const totalAtendimentos = atendimentos.length;
-            const totalAcionamentos = acionamentos.length;
             let filteredAtendimentos = atendimentos;
             let filteredAcionamentos = acionamentos;
+            // Aplica filtros se houver
             if (view === 'dia') {
                 filteredAtendimentos = atendimentos.filter(record => isToday(new Date(record.startTime)));
                 filteredAcionamentos = acionamentos.filter(record => isToday(new Date(record.dataHora)));
-            } else {
-                filteredAcionamentos = acionamentos; // Mantém todos os acionamentos na visualização completa
+            } else if (currentFilters.profissional || currentFilters.setor || currentFilters.dataInicio || currentFilters.dataFim) {
+                filteredAtendimentos = filterRecords(atendimentos, false);
+                filteredAcionamentos = filterRecords(acionamentos, true);
             }
-            // if (view === 'dia') {
-            //     filteredAtendimentos = atendimentos.filter(record => isToday(new Date(record.startTime)));
-            // }
-            const atendimentosHoje = atendimentos.filter(a => {
-                const data = new Date(a.startTime);
-                return isToday(data);
-            }).length;
-
-            const acionamentosHoje = acionamentos.filter(a => {
-                const data = new Date(a.dataHora);
-                return isToday(data);
-            }).length;
-
-            const acionamentosPendentes = acionamentos.filter(a => a.status === 'pendente').length;
-            const acionamentosEmAtendimento = atendimentos.filter(a => a.status === 'active').length;
-            // Alteração: contagem de concluídos depende da visualização
-            let acionamentosConcluidos = 0;
-            if (view === 'dia') {
-                acionamentosConcluidos = acionamentos.filter(a => a.status === 'concluido' && isToday(new Date(a.dataHora))).length;
-            } else {
-                acionamentosConcluidos = acionamentos.filter(a => a.status === 'concluido').length;
-            }
-
-            // Calcular tempo médio de atendimento (em milissegundos)
-            const atendimentosConcluidos = atendimentos.filter(a => a.status === 'completed' && a.duration);
+            const totalAtendimentos = filteredAtendimentos.length;
+            const totalAcionamentos = filteredAcionamentos.length;
+            const atendimentosHoje = filteredAtendimentos.filter(a => isToday(new Date(a.startTime))).length;
+            const acionamentosHoje = filteredAcionamentos.filter(a => isToday(new Date(a.dataHora))).length;
+            const acionamentosPendentes = filteredAcionamentos.filter(a => a.status === 'pendente').length;
+            const acionamentosEmAtendimento = filteredAtendimentos.filter(a => a.status === 'active').length;
+            let acionamentosConcluidos = filteredAcionamentos.filter(a => a.status === 'concluido').length;
+            let atendimentosConcluidos = filteredAtendimentos.filter(a => a.status === 'completed' && a.duration);
             let tempoMedio = 0;
-
             if (atendimentosConcluidos.length > 0) {
                 const totalTempo = atendimentosConcluidos.reduce((sum, a) => sum + a.duration, 0);
                 tempoMedio = totalTempo / atendimentosConcluidos.length;
             }
-
+            let terminaisProgramadas = 0;
+            if (view === 'dia') {
+                terminaisProgramadas = filteredAtendimentos.filter(a => a.motivo === 'Terminal Programada' && isToday(new Date(a.startTime))).length;
+            }
             const container = document.getElementById('stats-container');
             let html = '';
-
             if (view === 'completa') {
                 html += `
-            <div class="stat-card">
-                <div class="stat-value stat-total">${totalAtendimentos}</div>
-                <div class="stat-label">Total de Terminais</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value stat-total">${totalAcionamentos}</div>
-                <div class="stat-label">Total de Acionamentos</div>
-            </div>
-        `;
+                    <div class="stat-card">
+                        <div class="stat-value stat-total">${totalAtendimentos}</div>
+                        <div class="stat-label">Total de Terminais</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value stat-total">${totalAcionamentos}</div>
+                        <div class="stat-label">Total de Acionamentos</div>
+                    </div>
+                `;
             }
-
             html += `
                 <div class="stat-card">
                     <div class="stat-value stat-hoje">${atendimentosHoje}</div>
@@ -822,95 +757,48 @@
                 <div class="stat-card">
                     <div class="stat-value stat-media">${formatDurationShort(tempoMedio)}</div>
                     <div class="stat-label">Tempo Médio</div>
-                </div>
+                </div> 
             `;
-
+            if (view === 'dia') {
+                html += `
+                <div class="stat-card">
+                    <div class="stat-value stat-programada">${terminaisProgramadas}</div>
+                    <div class="stat-label">Terminais Programadas</div>
+                </div>
+                `;
+            }
             container.innerHTML = html;
         }
+
+
+
         function filterRecords(records, isAcionamento = false) {
             return records.filter(record => {
-                // Filtro por profissional
                 if (currentFilters.profissional &&
-                    (!isAcionamento && !record.nome.toLowerCase().includes(currentFilters.profissional))) {
+                    (!isAcionamento && (!record.nome || !record.nome.toLowerCase().includes(currentFilters.profissional)))) {
                     return false;
                 }
-
-                // Filtro por setor
-                if (currentFilters.setor && record.setor !== currentFilters.setor) {
-                    return false;
+                if (currentFilters.setor) {
+                    const setorRecord = (record.setor || '').toString().trim().toLowerCase();
+                    const setorFiltro = currentFilters.setor.trim().toLowerCase();
+                    if (setorRecord !== setorFiltro) return false;
                 }
-
-                // Filtro por data
                 const recordDate = isAcionamento ?
                     new Date(record.dataHora) :
                     new Date(record.startTime);
-
                 if (currentFilters.dataInicio) {
                     const filterDate = new Date(currentFilters.dataInicio);
                     if (recordDate < filterDate) return false;
                 }
-
                 if (currentFilters.dataFim) {
                     const filterDate = new Date(currentFilters.dataFim);
-                    filterDate.setDate(filterDate.getDate() + 1); // Inclui o dia inteiro
+                    filterDate.setDate(filterDate.getDate() + 1);
                     if (recordDate >= filterDate) return false;
                 }
-
                 return true;
             });
         }
 
-        // function loadAtivos() {
-        //     const records = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
-        //     const ativos = records.filter(record => record.status === 'active');
-
-        //     const container = document.getElementById('ativos-container');
-        //     container.innerHTML = '';
-
-        //     if (ativos.length === 0) {
-        //         container.innerHTML = '<div class="no-records">Nenhum atendimento em andamento no momento</div>';
-        //         return;
-        //     }
-
-        //     // Parar todos os temporizadores antigos
-        //     Object.keys(activeTimers).forEach(id => {
-        //         clearInterval(activeTimers[id]);
-        //     });
-        //     activeTimers = {};
-
-        //     ativos.forEach(atendimento => {
-        //         const card = document.createElement('div');
-        //         card.className = 'ativo-card';
-        //         const id = `ativo-timer-${atendimento.id}`;
-        //         card.innerHTML = `
-        //             <div class="ativo-header">
-        //                 <div class="ativo-title">Leito ${atendimento.leito}</div>
-        //                 <div class="ativo-setor">${atendimento.setor}</div>
-        //             </div>
-        //             <div class="ativo-tempo" id="${id}">00:00:00</div>
-        //             <div class="ativo-detail">
-        //                 <span class="ativo-label">Profissional:</span>
-        //                 <span>${atendimento.nome}</span>
-        //             </div>
-        //             <div class="ativo-detail">
-        //                 <span class="ativo-label">Motivo:</span>
-        //                 <span>${atendimento.motivo}</span>
-        //             </div>
-        //             ${atendimento.observacao ? `
-        //             <div class="ativo-detail">
-        //                 <span class="ativo-label">Observações:</span>
-        //                 <span>${atendimento.observacao}</span>
-        //             </div>` : ''}
-        //         `;
-        //         container.appendChild(card);
-
-        //         // Iniciar temporizador para este atendimento
-        //         startActiveTimer(atendimento.id, atendimento.startTime, id);
-
-        //         // Atualizar status do acionamento para "em_atendimento"
-        //         updateAcionamentoStatus(atendimento.leito, atendimento.setor, 'em_atendimento');
-        //     });
-        // }
         function loadAtivos() {
             // Filtra os atendimentos ativos
             const ativos = atendimentos.filter(record => record.status === 'active');
@@ -1005,122 +893,20 @@
             }
         }
 
-        // function loadAtendimentos() {
-        //     const records = filterRecords(JSON.parse(localStorage.getItem('activityRecords')) || []);
-        //     const container = document.getElementById('atendimentos-list');
 
-        //     if (records.length === 0) {
-        //         container.innerHTML = '<div class="no-records">Nenhum atendimento registrado</div>';
-        //         return;
-        //     }
-
-        //     // Ordenar por data mais recente primeiro
-        //     const sortedRecords = [...records].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
-
-        //     container.innerHTML = '';
-
-        //     sortedRecords.forEach(record => {
-        //         const startDate = new Date(record.startTime);
-        //         const endDate = new Date(record.endTime);
-
-        //         // Se o atendimento foi concluído, garantir que o acionamento relacionado também está
-        //         if (record.status === 'completed' && record.endTime) {
-        //             updateAcionamentoStatus(record.leito, record.setor, 'concluido');
-        //         }
-
-        //         const card = document.createElement('div');
-        //         card.className = 'record-card';
-        //         card.innerHTML = `
-        //             <button class="delete-btn" onclick="deleteRecord('activityRecords', ${record.id})">×</button>
-        //             <div class="record-header">
-        //                 <div class="record-title">${record.leito}</div>
-        //                 <div class="record-setor">${record.setor}</div>
-        //             </div>
-
-        //             <div class="record-detail">
-        //                 <span class="detail-label">Profissional:</span>
-        //                 <span>${record.nome}</span>
-        //             </div>
-
-        //             <div class="record-detail">
-        //                 <span class="detail-label">Motivo:</span>
-        //                 <span>${record.motivo}</span>
-        //             </div>
-
-        //             ${record.observacao ? `
-        //             <div class="record-detail">
-        //                 <span class="detail-label">Observações:</span>
-        //                 <span>${record.observacao}</span>
-        //             </div>` : ''}
-
-        //             <div class="record-time">
-        //                 <div><strong>Início:</strong> ${formatDateTime(startDate)}</div>
-        //                 ${record.endTime ? `
-        //                 <div><strong>Término:</strong> ${formatDateTime(endDate)}</div>
-        //                 <div class="record-duration">Duração: ${formatDuration(record.duration)}</div>
-        //                 ` : '<div><strong>Status:</strong> Em andamento</div>'}
-        //             </div>
-        //         `;
-        //         container.appendChild(card);
-        //     });
-        // }
-
-        // function loadAcionamentos() {
-        //     const acionamentos = filterRecords(JSON.parse(localStorage.getItem('acionamentos')) || [], true);
-        //     const container = document.getElementById('acionamentos-list');
-
-        //     if (acionamentos.length === 0) {
-        //         container.innerHTML = '<div class="no-records">Nenhum acionamento registrado</div>';
-        //         return;
-        //     }
-
-        //     // Ordenar por data mais recente primeiro
-        //     const sortedAcionamentos = [...acionamentos].sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
-
-        //     container.innerHTML = '';
-
-        //     sortedAcionamentos.forEach(acionamento => {
-        //         const dataHora = new Date(acionamento.dataHora);
-        //         const statusClass = getStatusClass(acionamento.status);
-
-        //         const card = document.createElement('div');
-        //         card.className = 'record-card';
-        //         card.innerHTML = `
-        //             <button class="delete-btn" onclick="deleteRecord('acionamentos', ${acionamento.id})">×</button>
-        //             <div class="record-header">
-        //                 <div class="record-title">Leito ${acionamento.leito}</div>
-        //                 <div class="record-setor ${statusClass}">${formatStatus(acionamento.status)}</div>
-        //             </div>
-
-        //             <div class="record-detail">
-        //                 <span class="detail-label">Setor:</span>
-        //                 <span>${acionamento.setor}</span>
-        //             </div>
-
-        //             <div class="record-detail">
-        //                 <span class="detail-label">Solicitante:</span>
-        //                 <span>${acionamento.responsavel}</span>
-        //             </div>
-
-        //             <div class="record-time">
-        //                 <div><strong>Data/Hora:</strong> ${formatDateTime(dataHora)}</div>
-        //             </div>
-        //         `;
-        //         container.appendChild(card);
-        //     });
-        // }
         function loadAtendimentos() {
             const container = document.getElementById('atendimentos-list');
             const view = document.getElementById('stats-view')?.value || 'completa';
             let filteredAtendimentos = atendimentos;
             if (view === 'dia') {
                 filteredAtendimentos = atendimentos.filter(record => isToday(new Date(record.startTime)));
+            } else if (currentFilters.profissional || currentFilters.setor || currentFilters.dataInicio || currentFilters.dataFim) {
+                filteredAtendimentos = filterRecords(atendimentos, false);
             }
             if (filteredAtendimentos.length === 0) {
                 container.innerHTML = '<div class="no-records">Nenhum atendimento registrado</div>';
                 return;
             }
-            // Ordenar por data mais recente primeiro
             const sortedRecords = [...filteredAtendimentos].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
             container.innerHTML = '';
             sortedRecords.forEach(record => {
@@ -1168,22 +954,21 @@
         function loadAcionamentos() {
             const container = document.getElementById('acionamentos-list');
             container.innerHTML = '';
-            // Filtrar acionamentos conforme visualização
             const view = document.getElementById('stats-view')?.value || 'completa';
             let filteredAcionamentos = acionamentos;
             if (view === 'dia') {
                 filteredAcionamentos = acionamentos.filter(a => isToday(new Date(a.dataHora)));
+            } else if (currentFilters.profissional || currentFilters.setor || currentFilters.dataInicio || currentFilters.dataFim) {
+                filteredAcionamentos = filterRecords(acionamentos, true);
             }
             if (filteredAcionamentos.length === 0) {
                 container.innerHTML = '<div class="no-records">Nenhum acionamento registrado</div>';
                 return;
             }
-            // Agrupar por status
             const statusOrder = ['pendente', 'em_atendimento', 'concluido'];
             statusOrder.forEach(status => {
                 const group = filteredAcionamentos.filter(a => a.status === status);
                 if (group.length > 0) {
-                    // Adiciona um título para cada grupo
                     const groupTitle = document.createElement('h3');
                     groupTitle.textContent = formatStatus(status);
                     groupTitle.style.marginTop = '30px';
@@ -1193,7 +978,6 @@
                         .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
                         .forEach(acionamento => {
                             const dataHora = new Date(acionamento.dataHora)
-                            // const dataHora = (new Date(acionamento.dataHora))-3600000; // Ajuste de fuso horário
                             const statusClass = getStatusClass(acionamento.status);
                             const card = document.createElement('div');
                             card.className = 'record-card';
