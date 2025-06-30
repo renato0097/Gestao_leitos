@@ -1041,6 +1041,10 @@
             }, 5000);
         }
 
+        function normalize(str) {
+            return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() : '';
+        }
+
         window.focusRecord = focusRecord;
         window.finishActiveRecord = finishActiveRecord;
     </script>

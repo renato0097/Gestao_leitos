@@ -53,7 +53,7 @@ VISUALIZACAO_TOKENS = {
     os.getenv("TOKEN_VISUALIZACAO_GL"),
     os.getenv("TOKEN_VISUALIZACAO_SHL"),
 }
-
+# ate aqui ta certo
 def validar_token(token):
     for setor, t in TOKENS_POR_SETOR.items():
         if token == t:
@@ -72,6 +72,12 @@ def require_token(f):
         return f(*args, **kwargs)
     return decorated
 
+def normalize_setor(s):
+    import unicodedata
+    if not s:
+        return ''
+    return unicodedata.normalize('NFD', s).encode('ascii', 'ignore').decode('utf-8').strip().lower()
+
 # Lista para armazenar acionamentos
 acionamentos = []
 registros = []
@@ -79,6 +85,9 @@ registros = []
 @app.route('/', methods=['POST'])
 def receber_acionamento():
     data = request.get_json()
+    # Padroniza o setor antes de salvar
+    if 'setor' in data:
+        data['setor'] = normalize_setor(data['setor'])
     acionamentos.append(data)
     print("Dados API:", data)
     return jsonify({'success': True}), 200
@@ -87,9 +96,12 @@ def receber_acionamento():
 @require_token
 def adicionar_registro():
     data = request.get_json()
-    # Só aceita se o setor do acionamento for igual ao setor do token
-    if data.get('setor', '').strip().lower() != request.setor.strip().lower():
+    # Padroniza o setor antes de comparar e salvar
+    setor_registro = normalize_setor(data.get('setor', ''))
+    setor_token = normalize_setor(request.setor)
+    if setor_registro != setor_token:
         return jsonify({'error': 'Setor do registro não corresponde ao setor do token'}), 403
+    data['setor'] = setor_registro
     registros.append(data)
     print("Registro adicionado:", data)
     return jsonify({'success': True}), 200
@@ -97,8 +109,8 @@ def adicionar_registro():
 @app.route('/registros', methods=['GET'])
 @require_token
 def listar_registros():
-    setor = request.setor
-    registros_do_setor = [r for r in registros if r.get('setor') == setor]
+    setor = normalize_setor(request.setor)
+    registros_do_setor = [r for r in registros if normalize_setor(r.get('setor')) == setor]
     return jsonify(registros_do_setor), 200
 
 @app.route('/registros_admin', methods=['GET'])
