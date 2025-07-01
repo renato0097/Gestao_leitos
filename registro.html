@@ -704,7 +704,7 @@
                 return;
             }
             const nome = document.getElementById('nome').value;
-            const setor = selectedActivation.setor;
+            const setor = setorDoToken; // setorDoToken já está normalizado pelo token
             const leito = selectedActivation.leito;
             const motivo = selectedActivation.motivo;
             const observacao = document.getElementById('observacao').value;
@@ -712,17 +712,29 @@
                 showStatus('Por favor, preencha todos os campos obrigatórios!', 'error');
                 return;
             }
-            const recordId = Date.now();
-            currentRecord = {
+                        currentRecord = {
                 id: recordId,
                 nome,
-                setor,
+                setor: setorDoToken, // <-- sempre use o setor do token
                 motivo,
                 leito,
                 observacao,
                 startTime: new Date(),
                 status: 'active'
             };
+            
+            
+            // const recordId = Date.now();
+            // currentRecord = {
+            //     id: recordId,
+            //     nome,
+            //     setor,
+            //     motivo,
+            //     leito,
+            //     observacao,
+            //     startTime: new Date(),
+            //     status: 'active'
+            // };
             startTimer(recordId);
             document.getElementById('timer').style.display = 'block';
             document.getElementById('start-btn').disabled = true;
